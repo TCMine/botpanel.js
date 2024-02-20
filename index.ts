@@ -10,6 +10,7 @@ function getEnumKeyByEnumValue(myEnum: any, enumValue: any) {
 /**
 * Represents an authenticated client for Bot Panel
 * @extends {EventEmitter}
+* @constructor
 */
 
 export class Client extends EventEmitter {
