@@ -38,12 +38,14 @@ class Client extends node_events_1.default {
             try {
                 const ws = new ws_1.default('wss://botpanel.xyz/api/ws');
                 this.ws = ws;
+                let connected = false;
                 ws.on('open', () => {
                     this.emit('debug', 'Dashboard initialized.');
                 });
                 ws.on('close', () => {
                     this.emit('debug', 'Dashboard closed.');
                     this.emit('close');
+                    return false;
                 });
                 ws.on('message', (message) => __awaiter(this, void 0, void 0, function* () {
                     var _a, _b;
@@ -60,6 +62,7 @@ class Client extends node_events_1.default {
                         }));
                     }
                     else if (data.op == common_1.OperationCodes.AUTH_SUCCESS) {
+                        connected = true;
                         this.emit('debug', `Successfully authenticated with application "${data.d.name}" (${this.authOptions.id})`);
                         setInterval(() => {
                             ws.send(JSON.stringify({
@@ -68,13 +71,17 @@ class Client extends node_events_1.default {
                         }, data.d.heartbeatInterval);
                         return true;
                     }
+                    else if (data.op == common_1.OperationCodes.ERROR && !connected) {
+                        this.emit('debug', 'Failed to authenticate');
+                        return Error(data.d.error);
+                    }
                     else {
-                        this.emit((_b = getEnumKeyByEnumValue(common_1.OperationCodes, data.op)) !== null && _b !== void 0 ? _b : data.op);
+                        this.emit((_b = getEnumKeyByEnumValue(common_1.OperationCodes, data.op)) !== null && _b !== void 0 ? _b : data.op, data.d);
                     }
                 }));
             }
             catch (err) {
-                this.emit('debug', 'Failed to login client');
+                this.emit('debug', 'Failed to connect');
                 return false;
             }
         });

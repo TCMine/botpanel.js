@@ -26,13 +26,14 @@ export class Client extends EventEmitter {
 		try {
 			const ws = new WebSocket('wss://botpanel.xyz/api/ws');
 			this.ws = ws;
-
+			let connected = false
 			ws.on('open', () => {
 				this.emit('debug', 'Dashboard initialized.');
 			});
 			ws.on('close', () => {
 				this.emit('debug', 'Dashboard closed.');
 				this.emit('close');
+				return false
 			});
 			ws.on('message', async (message: string) => {
 				this.emit('debug', `Message received: ${message}`)
@@ -47,6 +48,7 @@ export class Client extends EventEmitter {
 						}
 					}));
 				} else if (data.op == OperationCodes.AUTH_SUCCESS) {
+					connected = true
 					this.emit('debug', `Successfully authenticated with application "${data.d.name}" (${this.authOptions.id})`);
 					setInterval(() => {
 						ws.send(JSON.stringify({
@@ -54,13 +56,16 @@ export class Client extends EventEmitter {
 						}));
 					}, data.d.heartbeatInterval);
 					return true;
+				} else if (data.op == OperationCodes.ERROR && !connected) {
+					this.emit('debug', 'Failed to authenticate');
+					return Error(data.d.error)
 				} else {
-					this.emit(getEnumKeyByEnumValue(OperationCodes, data.op) ?? data.op)
+					this.emit(getEnumKeyByEnumValue(OperationCodes, data.op) ?? data.op, data.d)
 				}
 			});
 			
 		} catch (err) {
-			this.emit('debug', 'Failed to login client');
+			this.emit('debug', 'Failed to connect');
 			return false;
 		}
 	}
