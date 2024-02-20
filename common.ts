@@ -26,5 +26,5 @@ export interface AuthenticationData {
    */
   id: string,
   secret: string,
-  connectAs?: 'application' | string,
+  connectAs?: 'application',
 } 
