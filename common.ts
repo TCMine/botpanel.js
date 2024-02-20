@@ -5,6 +5,7 @@ export enum OperationCodes {
     GUILD_INTERACTION = 4,
     REQUEST_GUILD_DATA = 5,
     MODIFY_GUILD_DATA = 6,
+    ACKNOWLEDGE_INTERACTION = 7,
     HEARTBEAT = 8
 }
 
