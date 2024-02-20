@@ -21,6 +21,7 @@ export interface GuildInteraction extends BaseInteraction {
     guildId: string | number
 }
 
+
 export interface GuildRequestResponse extends GuildInteraction {
     data: GuildData | null,
     inGuild: boolean

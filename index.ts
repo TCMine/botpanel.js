@@ -27,7 +27,7 @@ export class Client extends EventEmitter {
 	 * Connect to the dashboard and login
 	 * @returns Connection successful?
 	 */
-	async login() {
+	async login(debugOptions?: {heartbeat:boolean}) {
 		try {
 			const ws = new WebSocket('wss://botpanel.xyz/api/ws');
 			this.ws = ws;
@@ -42,6 +42,7 @@ export class Client extends EventEmitter {
 			});
 			ws.on('message', async (message: string) => {
 				this.emit('debug', `Message received: ${message}`)
+				this.emit(getEnumKeyByEnumValue(Common.OperationCodes, data.op) ?? data.op, data.d)
 				const data = JSON.parse(message);
 				if (data.op == Common.OperationCodes.AUTHENTICATE) {
 					ws.send(JSON.stringify({
@@ -55,17 +56,17 @@ export class Client extends EventEmitter {
 				} else if (data.op == Common.OperationCodes.AUTH_SUCCESS) {
 					connected = true
 					this.emit('debug', `Successfully authenticated with application "${data.d.name}" (${this.authOptions.id})`);
+					if (debugOptions?.heartbeat) this.emit('debug', 'Heartbeat interval set to '+data.d.heartbeatInterval);
 					setInterval(() => {
 						ws.send(JSON.stringify({
 						  op: Common.OperationCodes.HEARTBEAT
 						}));
+						if (debugOptions?.heartbeat) this.emit('debug', 'Heartbeat sent');
 					}, data.d.heartbeatInterval);
 					return true;
 				} else if (data.op == Common.OperationCodes.ERROR && !connected) {
 					this.emit('debug', 'Failed to authenticate');
 					return Error(data.d.error)
-				} else {
-					this.emit(getEnumKeyByEnumValue(Common.OperationCodes, data.op) ?? data.op, data.d)
 				}
 			});
 		} catch (err) {
