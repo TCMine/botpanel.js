@@ -9,14 +9,18 @@ export enum OperationCodes {
     HEARTBEAT = 8
 }
 
-export enum OperationEvents {
-    AUTHENTICATE = 0,
-    AUTH_SUCCESS = 1,
-    ERROR = 2,
-    GUILD_INTERACTION = 4,
-    REQUEST_GUILD_DATA = 5,
-    MODIFY_GUILD_DATA = 6,
-    HEARTBEAT = 8
+export interface GuildData {
+    
+}
+
+export interface BaseInteraction {
+    interactionId: string | number
+}
+
+export interface GuildDataRequest extends BaseInteraction {
+    guildId: string | number
+    data: {}
+    inGuild: boolean
 }
 
 export interface AuthenticationData {
@@ -27,4 +31,4 @@ export interface AuthenticationData {
   id: string,
   secret: string,
   connectAs?: 'application',
-} 
+}
