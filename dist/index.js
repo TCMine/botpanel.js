@@ -13,20 +13,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = void 0;
+const common_1 = require("./common");
 const ws_1 = __importDefault(require("ws"));
 const node_events_1 = __importDefault(require("node:events"));
 /**
 * Represents an authenticated client for Bot Panel
 * @extends {EventEmitter}
 */
+function getEnumKeyByEnumValue(myEnum, enumValue) {
+    let keys = Object.keys(myEnum).filter(x => myEnum[x] == enumValue);
+    return keys.length > 0 ? keys[0] : null;
+}
 class Client extends node_events_1.default {
     /**
    * @param options Authentication options
    */
     constructor(options) {
-        var _a;
         super();
-        options.connectAs = (_a = options.connectAs) !== null && _a !== void 0 ? _a : 'application';
         this.authOptions = options;
         this.ws = null;
     }
@@ -43,16 +46,30 @@ class Client extends node_events_1.default {
                     this.emit('close');
                 });
                 ws.on('message', (message) => __awaiter(this, void 0, void 0, function* () {
+                    var _a, _b;
+                    this.emit('debug', `Message received: ${message}`);
                     const data = JSON.parse(message);
-                    if (data.op == 0) {
+                    if (data.op == common_1.OperationCodes.AUTHENTICATE) {
                         ws.send(JSON.stringify({
-                            op: 0,
-                            d: Object.assign({}, this.authOptions)
+                            op: common_1.OperationCodes.AUTHENTICATE,
+                            d: {
+                                connectAs: (_a = this.authOptions.connectAs) !== null && _a !== void 0 ? _a : "application",
+                                applicationId: this.authOptions.id,
+                                applicationSecret: this.authOptions.secret
+                            }
                         }));
                     }
-                    else if (data.op == 1) {
+                    else if (data.op == common_1.OperationCodes.AUTH_SUCCESS) {
                         this.emit('debug', `Successfully authenticated with application "${data.d.name}" (${this.authOptions.id})`);
+                        setInterval(() => {
+                            ws.send(JSON.stringify({
+                                op: common_1.OperationCodes.HEARTBEAT
+                            }));
+                        }, data.d.heartbeatInterval);
                         return true;
+                    }
+                    else {
+                        this.emit((_b = getEnumKeyByEnumValue(common_1.OperationCodes, data.op)) !== null && _b !== void 0 ? _b : data.op);
                     }
                 }));
             }

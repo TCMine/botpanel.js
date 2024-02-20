@@ -1,4 +1,4 @@
-import * as Types from './common';
+import { AuthenticationData, OperationCodes } from './common';
 import WebSocket from 'ws';
 import EventEmitter from 'node:events';
 
@@ -7,19 +7,18 @@ import EventEmitter from 'node:events';
 * @extends {EventEmitter}
 */
 
-function getEnumKeyByEnumValue(myEnum: Enumerator<number>, enumValue: string) {
+function getEnumKeyByEnumValue(myEnum: any, enumValue: any) {
     let keys = Object.keys(myEnum).filter(x => myEnum[x] == enumValue);
     return keys.length > 0 ? keys[0] : null;
 }
 export class Client extends EventEmitter {
-	authOptions: Types.AuthenticationData;
+	authOptions: AuthenticationData;
 	ws: null | WebSocket;
 	/**
    * @param options Authentication options
    */
-	constructor(options: Types.AuthenticationData) {
+	constructor(options: AuthenticationData) {
 		super();
-		options.connectAs = options.connectAs ?? 'application';
 		this.authOptions = options;
 		this.ws = null
 	}
@@ -36,21 +35,30 @@ export class Client extends EventEmitter {
 				this.emit('close');
 			});
 			ws.on('message', async (message: string) => {
+				this.emit('debug', `Message received: ${message}`)
 				const data = JSON.parse(message);
-				if (data.op == 0) {
+				if (data.op == OperationCodes.AUTHENTICATE) {
 					ws.send(JSON.stringify({
-						op: 0,
+						op: OperationCodes.AUTHENTICATE,
 						d: {
-							...this.authOptions
+							connectAs: this.authOptions.connectAs ?? "application",
+							applicationId: this.authOptions.id,
+							applicationSecret: this.authOptions.secret
 						}
 					}));
-				} else if (data.op == 1) {
+				} else if (data.op == OperationCodes.AUTH_SUCCESS) {
 					this.emit('debug', `Successfully authenticated with application "${data.d.name}" (${this.authOptions.id})`);
+					setInterval(() => {
+						ws.send(JSON.stringify({
+						  op: OperationCodes.HEARTBEAT
+						}));
+					}, data.d.heartbeatInterval);
 					return true;
 				} else {
-					this.emit(Types.OperationCodes.)
+					this.emit(getEnumKeyByEnumValue(OperationCodes, data.op) ?? data.op)
 				}
 			});
+			
 		} catch (err) {
 			this.emit('debug', 'Failed to login client');
 			return false;
