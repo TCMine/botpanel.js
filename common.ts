@@ -26,7 +26,7 @@ export interface GuildRequestResponse extends GuildInteraction {
     inGuild: boolean
 }
 
-export interface GuildDataChangedInteraction extends BaseInteraction {
+export interface GuildDataChangedInteraction extends GuildInteraction {
     varname: string,
     data: {},
     userId: string | number,
