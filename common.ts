@@ -10,17 +10,27 @@ export enum OperationCodes {
 }
 
 export interface GuildData {
-    
+
 }
 
 export interface BaseInteraction {
     interactionId: string | number
 }
 
-export interface GuildDataRequest extends BaseInteraction {
+export interface GuildInteraction extends BaseInteraction {
     guildId: string | number
-    data: {}
+}
+
+export interface GuildRequestResponse extends GuildInteraction {
+    data: GuildData | null,
     inGuild: boolean
+}
+
+export interface GuildDataChangedInteraction extends BaseInteraction {
+    varname: string,
+    data: {},
+    userId: string | number,
+    inputType: string           // will do later
 }
 
 export interface AuthenticationData {
