@@ -6,7 +6,7 @@ export const enum OperationCodes {
     REQUEST_GUILD_DATA = 5,
     MODIFY_GUILD_DATA = 6,
     HEARTBEAT = 8
-};
+}
 
 export interface AuthenticationData {
     /**
@@ -15,5 +15,5 @@ export interface AuthenticationData {
    */
   id: string,
   secret: string,
-  connectAs?: "application" | string,
+  connectAs?: 'application' | string,
 } 
