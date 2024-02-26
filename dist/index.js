@@ -42,11 +42,13 @@ exports.Client = void 0;
 const Common = __importStar(require("./common"));
 const ws_1 = __importDefault(require("ws"));
 const node_events_1 = __importDefault(require("node:events"));
+/*eslint-disable */
 function getEnumKeyByEnumValue(myEnum, enumValue) {
     const keys = Object.keys(myEnum).filter(x => myEnum[x] == enumValue);
     return keys.length > 0 ? keys[0] : null;
 }
 const messageHandlers = {
+    /*eslint-enable */
     [Common.OperationCodes.AUTHENTICATE]: (client) => {
         var _a, _b;
         (_a = client.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
@@ -60,9 +62,9 @@ const messageHandlers = {
     },
     [Common.OperationCodes.AUTH_SUCCESS]: (client, data, debugOptions) => {
         client.connected = true;
-        client.emit('debug', `Successfully authenticated with application "${data.d.name}" (${client.authOptions.id})`);
+        client.emit('debug', `Successfully authenticated with application "${data.name}" (${client.authOptions.id})`);
         if (debugOptions === null || debugOptions === void 0 ? void 0 : debugOptions.logHeartbeat)
-            client.emit('debug', 'Heartbeat interval set to ' + data.d.heartbeatInterval);
+            client.emit('debug', 'Heartbeat interval set to ' + data.heartbeatInterval);
         setInterval(() => {
             var _a;
             (_a = client.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
@@ -70,36 +72,42 @@ const messageHandlers = {
             }));
             if (debugOptions === null || debugOptions === void 0 ? void 0 : debugOptions.logHeartbeat)
                 client.emit('debug', 'Heartbeat sent');
-        }, data.d.heartbeatInterval);
-        return true;
+        }, data.heartbeatInterval);
+        return data;
     },
     [Common.OperationCodes.ERROR]: (client, data) => {
-        if (client.connected)
-            throw Error(data.d.error);
-        client.emit('debug', 'Failed to authenticate');
-        return Error(data.d.error);
+        if (!client.connected)
+            throw Error(data.error), client.emit('debug', 'Failed to authenticate');
+        return data;
+    },
+    [Common.OperationCodes.GUILD_INTERACTION]: (client, data) => {
+        return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId });
+    },
+    [Common.OperationCodes.MODIFY_GUILD_DATA]: (client, data) => {
+        return new DashboardInteraction(client, data);
     }
 };
 /**
  * Represents an authenticated client for Bot Panel
- * @extends {EventEmitter}
  * @constructor
 */
 class Client extends node_events_1.default {
     /**
      * @param options Authentication options
     */
-    constructor(options) {
+    constructor(options, debugOptions) {
         super();
-        this.ws = null;
+        /**
+         * Whether the Client is currently connected to the WebSocket
+         */
         this.connected = false;
         this.authOptions = options;
+        this.debugOptions = debugOptions;
     }
     /**
-     * Connect to the dashboard and login
-     * @returns Connection successful?
+     * Connect to the BotPanel WebSocket and login
      */
-    login(debugOptions) {
+    login() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ws = new ws_1.default('wss://botpanel.xyz/api/ws');
@@ -114,40 +122,121 @@ class Client extends node_events_1.default {
                     this.emit('close');
                     return false;
                 });
-                ws.on('message', (message) => __awaiter(this, void 0, void 0, function* () {
+                ws.on('message', (message) => {
                     var _a;
                     const data = JSON.parse(message);
                     this.emit('debug', `Message received: ${message}`);
-                    this.emit((_a = getEnumKeyByEnumValue(Common.OperationCodes, data.op)) !== null && _a !== void 0 ? _a : data.op, data.d);
-                    let v = messageHandlers[data.op];
+                    let dataToSend;
+                    const v = messageHandlers[data.op];
                     if (!v)
                         return;
                     try {
-                        v(this, data, debugOptions);
+                        dataToSend = v(this, data.d, this.debugOptions);
                     }
                     catch (err) {
-                        this.emit('debug', `[${Common.OperationCodes[data.op]}] Failed to send message: ${err}`);
+                        this.emit('debug', `Error: [${Common.OperationCodes[data.op]}]: ${err}`);
                     }
-                }));
+                    this.emit((_a = getEnumKeyByEnumValue(Common.OperationCodes, data.op)) !== null && _a !== void 0 ? _a : data.op.toString(), dataToSend);
+                });
             }
             catch (err) {
                 this.emit('debug', 'Failed to connect: ' + err);
-                return false;
+                throw err;
             }
         });
     }
+    /**
+     * Closes the WebSocket connection
+     */
     disconnect() {
         var _a;
         if (this.connected)
             (_a = this.ws) === null || _a === void 0 ? void 0 : _a.close();
-        else
-            throw Error("what");
     }
 }
 exports.Client = Client;
-class DashboardInteraction {
-    constructor(options) {
-        this.client = options.client;
+class BaseInteraction {
+    constructor(client, options) {
+        this.client = client;
+        this.id = options.interactionId;
+        this.guildId = options.guildId;
+    }
+}
+/**
+ * Guild information request interaction
+*/
+class DashboardRequestInteraction extends BaseInteraction {
+    constructor(client, options) {
+        super(client, options);
+    }
+    /**
+     * Send an interaction response containing guild information
+     * @param data Guild info
+     */
+    send(info) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            info.data = (_a = info.data) !== null && _a !== void 0 ? _a : {};
+            for (const [key, value] of Object.entries(info.data)) {
+                info.data[key] = value.toString();
+            }
+            yield new Promise((resolve) => {
+                var _a, _b, _c, _d, _e;
+                (_a = this.client.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
+                    op: Common.OperationCodes.REQUEST_GUILD_DATA,
+                    d: {
+                        interactionId: this.id,
+                        data: info.data,
+                        inGuild: info.inGuild,
+                        textChannels: (_b = info.textChannels) !== null && _b !== void 0 ? _b : [],
+                        voiceChannels: (_c = info.voiceChannels) !== null && _c !== void 0 ? _c : [],
+                        categories: (_d = info.categories) !== null && _d !== void 0 ? _d : [],
+                        roles: (_e = info.roles) !== null && _e !== void 0 ? _e : [],
+                    }
+                }), resolve);
+            });
+        });
+    }
+}
+/**
+ * Dashboard changed interaction
+*/
+class DashboardInteraction extends BaseInteraction {
+    constructor(client, options) {
+        super(client, options);
+        let newValue = options.data;
+        if (typeof options.data == 'string')
+            newValue = options.inputType == Common.ComponentType.Checkbox || options.inputType == Common.ComponentType.Select ? options.data.split(',') : options.data;
+        this.userId = options.userId;
+        this.input = {
+            type: options.inputType,
+            name: options.varname,
+            value: newValue
+        };
+        this.rawData = options;
+    }
+    /**
+    * Sends an interaction response indicating if the change was successful
+    * @param success Was the change successful? (this will be shown to the user)
+    */
+    acknowledge(success = true) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.id)
+                throw Error('Interaction already acknowledged');
+            yield new Promise((resolve) => {
+                var _a;
+                (_a = this.client.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
+                    op: Common.OperationCodes.ACKNOWLEDGE_INTERACTION,
+                    d: {
+                        interactionId: this.id,
+                        success,
+                        key: this.rawData.varname,
+                        value: this.rawData.data
+                    }
+                }), resolve);
+            });
+            this.id = null;
+        });
     }
 }
 __exportStar(require("./common"), exports);

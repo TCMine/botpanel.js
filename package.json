@@ -1,7 +1,7 @@
 {
-  "name": "bot-panel-wrapper",
-  "version": "13.17.1",
-  "description": "A basic wrapper for integrating Discord bots with Bot Panel",
+  "name": "botpanel.js",
+  "version": "1.0.0",
+  "description": "A simple library for integrating Discord bots with Bot Panel",
   "main": "dist/index.js",
   "type": "commonjs",
   "dependencies": {
