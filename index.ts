@@ -85,7 +85,6 @@ export class Client extends EventEmitter {
 				this.connected = false;
 				this.emit('debug', 'Dashboard closed.');
 				this.emit('close');
-				return false;
 			});
 
 			ws.on('message', (message: string) => {
