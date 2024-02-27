@@ -97,16 +97,12 @@ class Client extends node_events_1.default {
     */
     constructor(options, debugOptions) {
         super();
-        /**
-         * Whether the Client is currently connected to the WebSocket
-         */
+        /** Whether the Client is currently connected to the WebSocket */
         this.connected = false;
         this.authOptions = options;
         this.debugOptions = debugOptions;
     }
-    /**
-     * Connect to the BotPanel WebSocket and login
-     */
+    /** Connect to the BotPanel WebSocket and login */
     login() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -145,9 +141,7 @@ class Client extends node_events_1.default {
             }
         });
     }
-    /**
-     * Closes the WebSocket connection
-     */
+    /** Closes the WebSocket connection */
     disconnect() {
         var _a;
         if (this.connected)

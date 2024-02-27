@@ -7,33 +7,21 @@ import EventEmitter from 'node:events';
  * @constructor
 */
 export declare class Client extends EventEmitter {
-    /**
-     * Authentication information for the WebSocket
-     */
+    /** Authentication information for the WebSocket */
     authOptions: Common.AuthenticationData;
-    /**
-     * Client WebSocket
-     */
+    /** Client WebSocket */
     ws: undefined | WebSocket;
-    /**
-     * Whether the Client is currently connected to the WebSocket
-     */
+    /** Whether the Client is currently connected to the WebSocket */
     connected: boolean;
-    /**
-     * Options for debugging BotPanel.js
-     */
+    /** Options for debugging BotPanel.js */
     debugOptions: undefined | Common.ClientDebugOptions;
     /**
      * @param options Authentication options
     */
     constructor(options: Common.AuthenticationData, debugOptions?: Common.ClientDebugOptions);
-    /**
-     * Connect to the BotPanel WebSocket and login
-     */
+    /** Connect to the BotPanel WebSocket and login */
     login(): Promise<void>;
-    /**
-     * Closes the WebSocket connection
-     */
+    /** Closes the WebSocket connection */
     disconnect(): void;
 }
 export declare class BaseInteraction {

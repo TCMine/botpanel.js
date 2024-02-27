@@ -3,6 +3,7 @@ import WebSocket from 'ws';
 import EventEmitter from 'node:events';
 
 /*eslint-disable */
+// ts wont allow shut up if I put any type other than "any" for this or the messageHandlers. maybe theres a way to fix this, but I don't know it.
 function getEnumKeyByEnumValue(myEnum: any, enumValue: number): string | null { // {[key: string]: Common.OperationCodes}
 	const keys = Object.keys(myEnum).filter(x => myEnum[x] == enumValue);
 	return keys.length > 0 ? keys[0] : null;
@@ -52,22 +53,15 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
  * @constructor
 */
 export class Client extends EventEmitter {
-	/**
-	 * Authentication information for the WebSocket
-	 */
+	/** Authentication information for the WebSocket */
 	authOptions: Common.AuthenticationData;
-	/**
-	 * Client WebSocket
-	 */
+	/** Client WebSocket */
 	ws: undefined | WebSocket;
-	/**
-	 * Whether the Client is currently connected to the WebSocket
-	 */
+	/** Whether the Client is currently connected to the WebSocket */
 	connected: boolean = false;
-	/**
-	 * Options for debugging BotPanel.js
-	 */
+	/** Options for debugging BotPanel.js */
 	debugOptions: undefined | Common.ClientDebugOptions;
+
 	/**
 	 * @param options Authentication options
 	*/
@@ -76,9 +70,8 @@ export class Client extends EventEmitter {
 		this.authOptions = options;
 		this.debugOptions = debugOptions;
 	}
-	/**
-	 * Connect to the BotPanel WebSocket and login
-	 */
+
+	/** Connect to the BotPanel WebSocket and login */
 	async login() {
 		try {
 			const ws = new WebSocket('wss://botpanel.xyz/api/ws');
@@ -119,9 +112,7 @@ export class Client extends EventEmitter {
 		}
 	}
 
-	/**
-	 * Closes the WebSocket connection
-	 */
+	/** Closes the WebSocket connection */
 	disconnect() {
 		if (this.connected) this.ws?.close();
 	}
@@ -198,6 +189,7 @@ export class DashboardInteraction extends BaseInteraction {
 	constructor(client: Client, options: Common.GuildDataChangeInfo) {
 		super(client, options);
 		let newValue: Common.GuildData = options.data;
+		// convert string to array for Select and Checkbox types
 		if (typeof options.data == 'string') newValue = options.inputType == Common.ComponentType.Checkbox || options.inputType == Common.ComponentType.Select ? options.data.split(',') : options.data;
 		this.userId = options.userId;
 		this.input = {
