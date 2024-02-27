@@ -72,7 +72,7 @@ export class Client extends EventEmitter {
 	}
 
 	/** Connect to the BotPanel WebSocket and login */
-	async login() {
+	login() {
 		try {
 			const ws = new WebSocket('wss://botpanel.xyz/api/ws');
 			this.ws = ws;
