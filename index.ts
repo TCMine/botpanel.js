@@ -43,7 +43,7 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 	},
 
 	[Common.OperationCodes.MODIFY_GUILD_DATA]: (client: Client, data: Common.GuildDataChangeInfo) => {
-		return new DashboardInteraction(client, data);
+		return new DashboardChangeInteraction(client, data);
 	}
 
 };
@@ -121,7 +121,7 @@ export class Client extends EventEmitter {
 
 }
 
-export class BaseInteraction {
+export class DashboardInteraction {
 	client: Client;
 	/**
 	 * Assigned ID for the interaction
@@ -141,7 +141,7 @@ export class BaseInteraction {
 /**
  * Guild information request interaction
 */
-export class DashboardRequestInteraction extends BaseInteraction {
+export class DashboardRequestInteraction extends DashboardInteraction {
 	constructor(client: Client, options: Common.InteractionInfo) {
 		super(client, options);
 	}
@@ -174,7 +174,7 @@ export class DashboardRequestInteraction extends BaseInteraction {
 /**
  * Dashboard changed interaction
 */
-export class DashboardInteraction extends BaseInteraction {
+export class DashboardChangeInteraction extends DashboardInteraction {
 	/**
  	* ID of the user that initiated the interaction
 	*/
