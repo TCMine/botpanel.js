@@ -152,7 +152,7 @@ export class DashboardRequestInteraction extends BaseInteraction {
 	async send(info: Common.GuildRequestResponse) {
 		info.data = info.data ?? {};
 		for (const [key, value] of Object.entries(info.data)) {
-			info.data[key] = value.toString();
+			if (Array.isArray(value)) info.data[key] = value.toString();
 		}
 		await new Promise((resolve) => {
 			this.client.ws?.send(JSON.stringify({
