@@ -51,7 +51,6 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
  * Represents an authenticated client for Bot Panel
  * @constructor
 */
-
 export class Client extends EventEmitter {
 	/**
 	 * Authentication information for the WebSocket
