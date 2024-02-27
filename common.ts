@@ -11,7 +11,7 @@ export enum OperationCodes {
 	/** Guild is being accessed from the dashboard */
 	GUILD_INTERACTION = 4,
 	/** Response to GUILD_INTERACTION with guild data and info */
-	REQUEST_GUILD_DATA = 5, // this is the response
+	REQUEST_GUILD_DATA = 5,
 	/** Guild data modified by user */
 	MODIFY_GUILD_DATA = 6,
 	/** Acknowledges MODIFY_GUILD_DATA */
