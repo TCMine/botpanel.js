@@ -106,6 +106,8 @@ export class Client extends EventEmitter {
 				this.emit(getEnumKeyByEnumValue(Common.OperationCodes, data.op) ?? data.op.toString(), dataToSend);
 			});
 			
+			return this.ws
+
 		} catch (err) {
 			this.emit('debug', 'Failed to connect: ' + err);
 			throw err;
