@@ -76,7 +76,7 @@ export class Client extends EventEmitter {
 		try {
 			const ws = new WebSocket('wss://botpanel.xyz/api/ws');
 			this.ws = ws;
-			this.ws.sendJSON = (message: JSON) => this.ws.send(JSON.stringify(message));
+			this.ws.prototype.sendJSON = async (message: JSON) => {await new Promise((resolve) => {this.ws.send(JSON.stringify(message), resolve)})};
 			this.connected = false;
 			
 			ws.on('open', () => {
