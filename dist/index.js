@@ -38,7 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Client = void 0;
+exports.DashboardInteraction = exports.DashboardRequestInteraction = exports.BaseInteraction = exports.Client = void 0;
 const Common = __importStar(require("./common"));
 const ws_1 = __importDefault(require("ws"));
 const node_events_1 = __importDefault(require("node:events"));
@@ -162,6 +162,7 @@ class BaseInteraction {
         this.guildId = options.guildId;
     }
 }
+exports.BaseInteraction = BaseInteraction;
 /**
  * Guild information request interaction
 */
@@ -198,6 +199,7 @@ class DashboardRequestInteraction extends BaseInteraction {
         });
     }
 }
+exports.DashboardRequestInteraction = DashboardRequestInteraction;
 /**
  * Dashboard changed interaction
 */
@@ -239,4 +241,5 @@ class DashboardInteraction extends BaseInteraction {
         });
     }
 }
+exports.DashboardInteraction = DashboardInteraction;
 __exportStar(require("./common"), exports);

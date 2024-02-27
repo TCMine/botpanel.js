@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A simple library for integrating Discord bots with Bot Panel",
   "main": "dist/index.js",
-  "type": "commonjs",
   "dependencies": {
     "ws": "^8.16.0"
   },

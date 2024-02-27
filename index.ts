@@ -128,7 +128,7 @@ export class Client extends EventEmitter {
 
 }
 
-class BaseInteraction {
+export class BaseInteraction {
 	client: Client;
 	/**
 	 * Assigned ID for the interaction
@@ -148,7 +148,7 @@ class BaseInteraction {
 /**
  * Guild information request interaction
 */
-class DashboardRequestInteraction extends BaseInteraction {
+export class DashboardRequestInteraction extends BaseInteraction {
 	constructor(client: Client, options: Common.InteractionInfo) {
 		super(client, options);
 	}
@@ -181,7 +181,7 @@ class DashboardRequestInteraction extends BaseInteraction {
 /**
  * Dashboard changed interaction
 */
-class DashboardInteraction extends BaseInteraction {
+export class DashboardInteraction extends BaseInteraction {
 	/**
  	* ID of the user that initiated the interaction
 	*/
