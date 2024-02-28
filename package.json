@@ -2,6 +2,7 @@
   "name": "botpanel.js",
   "version": "1.0.1",
   "description": "A simple library for integrating Discord bots with Bot Panel",
+  "keywords": ["discord", "bot", "dashboard", "typescript"],
   "main": "dist/index.js",
   "dependencies": {
     "ws": "^8.16.0"
