@@ -20,11 +20,13 @@ export declare class Client extends EventEmitter {
     */
     constructor(options: Common.AuthenticationData, debugOptions?: Common.ClientDebugOptions);
     /** Connect to the BotPanel WebSocket and login */
-    login(): Promise<void>;
+    login(): Promise<WebSocket | null>;
     /** Closes the WebSocket connection */
     disconnect(): void;
+    /** Send a message to the WebSocket server (as JSON) */
+    send(message: object): void;
 }
-export declare class BaseInteraction {
+export declare class DashboardInteraction {
     client: Client;
     /**
      * Assigned ID for the interaction
@@ -39,7 +41,7 @@ export declare class BaseInteraction {
 /**
  * Guild information request interaction
 */
-export declare class DashboardRequestInteraction extends BaseInteraction {
+export declare class DashboardRequestInteraction extends DashboardInteraction {
     constructor(client: Client, options: Common.InteractionInfo);
     /**
      * Send an interaction response containing guild information
@@ -50,7 +52,7 @@ export declare class DashboardRequestInteraction extends BaseInteraction {
 /**
  * Dashboard changed interaction
 */
-export declare class DashboardInteraction extends BaseInteraction {
+export declare class DashboardChangeInteraction extends DashboardInteraction {
     /**
     * ID of the user that initiated the interaction
     */

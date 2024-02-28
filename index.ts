@@ -72,53 +72,56 @@ export class Client extends EventEmitter {
 	}
 
 	/** Connect to the BotPanel WebSocket and login */
-	login() {
-		try {
-			const ws = new WebSocket('wss://botpanel.xyz/api/ws');
-			this.ws = ws;
-			this.ws.prototype.sendJSON = async (message: JSON) => {new Promise((resolve) => {this.ws.send(JSON.stringify(message), resolve)})};
-			this.connected = false;
-			
-			ws.on('open', () => {
-				this.emit('debug', 'Dashboard initialized.');
-			});
-			ws.on('close', () => {
+	async login() {
+		return new Promise<WebSocket | null>((resolve, reject) => {
+			try {
+				const ws = new WebSocket('wss://botpanel.xyz/api/ws');
+				if (this.ws) this.ws.close
+				this.ws = ws;
 				this.connected = false;
-				this.emit('debug', 'Dashboard closed.');
-				this.emit('close');
-			});
+				
+				ws.onopen = () => {
+					this.emit('debug', 'Dashboard initialized.');
+					resolve(ws)
+				};
+				ws.onclose = () => {
+					this.connected = false;
+					this.emit('debug', 'Dashboard closed.');
+					this.emit('close');
+					reject()
+				};
+				ws.onmessage = (event) => {
+					const message: string = event.data.toString()
+					const data: Common.ServerMessage = JSON.parse(message);
+					
+					this.emit('debug', `Message received: ${message}`);
 
-			ws.on('message', (message: string) => {
-				const data: Common.ServerMessage = JSON.parse(message);
-
-				this.emit('debug', `Message received: ${message}`);
-
-				let dataToSend;
-				const v = messageHandlers[data.op];
-				if (!v) return;
-
-				try {
-					dataToSend = v(this, data.d, this.debugOptions);
-				} catch (err) {
-					this.emit('debug', `Error: [${Common.OperationCodes[data.op]}]: ${err}`);
-				}
-
-				this.emit(getEnumKeyByEnumValue(Common.OperationCodes, data.op) ?? data.op.toString(), dataToSend);
-			});
-			
-			return this.ws
-
-		} catch (err) {
-			this.emit('debug', 'Failed to connect: ' + err);
-			throw err;
-		}
+					let dataToSend;
+					const v = messageHandlers[data.op];
+					if (!v) return;
+					
+					try {
+						dataToSend = v(this, data.d, this.debugOptions);
+					} catch (err) {
+						this.emit('debug', `Error: [${Common.OperationCodes[data.op]}]: ${err}`);
+					}
+					
+					this.emit(getEnumKeyByEnumValue(Common.OperationCodes, data.op) ?? data.op.toString(), dataToSend);
+				};
+			} catch (err) {
+				this.emit('debug', 'Failed to connect: ' + err);
+				throw err;
+			}
+		})
 	}
-
+	
 	/** Closes the WebSocket connection */
 	disconnect() {
 		if (this.connected) this.ws?.close();
 	}
-
+	
+	/** Send a message to the WebSocket server (as JSON) */
+	send(message: object) {this.ws?.send(JSON.stringify(message))};
 }
 
 export class DashboardInteraction {

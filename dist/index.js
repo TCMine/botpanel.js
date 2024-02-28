@@ -38,11 +38,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DashboardInteraction = exports.DashboardRequestInteraction = exports.BaseInteraction = exports.Client = void 0;
+exports.DashboardChangeInteraction = exports.DashboardRequestInteraction = exports.DashboardInteraction = exports.Client = void 0;
 const Common = __importStar(require("./common"));
 const ws_1 = __importDefault(require("ws"));
 const node_events_1 = __importDefault(require("node:events"));
 /*eslint-disable */
+// ts wont allow shut up if I put any type other than "any" for this or the messageHandlers. maybe theres a way to fix this, but I don't know it.
 function getEnumKeyByEnumValue(myEnum, enumValue) {
     const keys = Object.keys(myEnum).filter(x => myEnum[x] == enumValue);
     return keys.length > 0 ? keys[0] : null;
@@ -84,7 +85,7 @@ const messageHandlers = {
         return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId });
     },
     [Common.OperationCodes.MODIFY_GUILD_DATA]: (client, data) => {
-        return new DashboardInteraction(client, data);
+        return new DashboardChangeInteraction(client, data);
     }
 };
 /**
@@ -105,40 +106,46 @@ class Client extends node_events_1.default {
     /** Connect to the BotPanel WebSocket and login */
     login() {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const ws = new ws_1.default('wss://botpanel.xyz/api/ws');
-                this.ws = ws;
-                this.connected = false;
-                ws.on('open', () => {
-                    this.emit('debug', 'Dashboard initialized.');
-                });
-                ws.on('close', () => {
+            return new Promise((resolve, reject) => {
+                try {
+                    const ws = new ws_1.default('wss://botpanel.xyz/api/ws');
+                    if (this.ws)
+                        this.ws.close;
+                    this.ws = ws;
                     this.connected = false;
-                    this.emit('debug', 'Dashboard closed.');
-                    this.emit('close');
-                    return false;
-                });
-                ws.on('message', (message) => {
-                    var _a;
-                    const data = JSON.parse(message);
-                    this.emit('debug', `Message received: ${message}`);
-                    let dataToSend;
-                    const v = messageHandlers[data.op];
-                    if (!v)
-                        return;
-                    try {
-                        dataToSend = v(this, data.d, this.debugOptions);
-                    }
-                    catch (err) {
-                        this.emit('debug', `Error: [${Common.OperationCodes[data.op]}]: ${err}`);
-                    }
-                    this.emit((_a = getEnumKeyByEnumValue(Common.OperationCodes, data.op)) !== null && _a !== void 0 ? _a : data.op.toString(), dataToSend);
-                });
-            }
-            catch (err) {
-                this.emit('debug', 'Failed to connect: ' + err);
-                throw err;
-            }
+                    ws.onopen = () => {
+                        this.emit('debug', 'Dashboard initialized.');
+                        resolve(ws);
+                    };
+                    ws.onclose = () => {
+                        this.connected = false;
+                        this.emit('debug', 'Dashboard closed.');
+                        this.emit('close');
+                        reject();
+                    };
+                    ws.onmessage = (event) => {
+                        var _a;
+                        const message = event.data.toString();
+                        const data = JSON.parse(message);
+                        this.emit('debug', `Message received: ${message}`);
+                        let dataToSend;
+                        const v = messageHandlers[data.op];
+                        if (!v)
+                            return;
+                        try {
+                            dataToSend = v(this, data.d, this.debugOptions);
+                        }
+                        catch (err) {
+                            this.emit('debug', `Error: [${Common.OperationCodes[data.op]}]: ${err}`);
+                        }
+                        this.emit((_a = getEnumKeyByEnumValue(Common.OperationCodes, data.op)) !== null && _a !== void 0 ? _a : data.op.toString(), dataToSend);
+                    };
+                }
+                catch (err) {
+                    this.emit('debug', 'Failed to connect: ' + err);
+                    throw err;
+                }
+            });
         });
     }
     /** Closes the WebSocket connection */
@@ -147,20 +154,23 @@ class Client extends node_events_1.default {
         if (this.connected)
             (_a = this.ws) === null || _a === void 0 ? void 0 : _a.close();
     }
+    /** Send a message to the WebSocket server (as JSON) */
+    send(message) { var _a; (_a = this.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify(message)); }
+    ;
 }
 exports.Client = Client;
-class BaseInteraction {
+class DashboardInteraction {
     constructor(client, options) {
         this.client = client;
         this.id = options.interactionId;
         this.guildId = options.guildId;
     }
 }
-exports.BaseInteraction = BaseInteraction;
+exports.DashboardInteraction = DashboardInteraction;
 /**
  * Guild information request interaction
 */
-class DashboardRequestInteraction extends BaseInteraction {
+class DashboardRequestInteraction extends DashboardInteraction {
     constructor(client, options) {
         super(client, options);
     }
@@ -173,7 +183,8 @@ class DashboardRequestInteraction extends BaseInteraction {
         return __awaiter(this, void 0, void 0, function* () {
             info.data = (_a = info.data) !== null && _a !== void 0 ? _a : {};
             for (const [key, value] of Object.entries(info.data)) {
-                info.data[key] = value.toString();
+                if (Array.isArray(value))
+                    info.data[key] = value.toString();
             }
             yield new Promise((resolve) => {
                 var _a, _b, _c, _d, _e;
@@ -197,10 +208,11 @@ exports.DashboardRequestInteraction = DashboardRequestInteraction;
 /**
  * Dashboard changed interaction
 */
-class DashboardInteraction extends BaseInteraction {
+class DashboardChangeInteraction extends DashboardInteraction {
     constructor(client, options) {
         super(client, options);
         let newValue = options.data;
+        // convert string to array for Select and Checkbox types
         if (typeof options.data == 'string')
             newValue = options.inputType == Common.ComponentType.Checkbox || options.inputType == Common.ComponentType.Select ? options.data.split(',') : options.data;
         this.userId = options.userId;
@@ -235,5 +247,5 @@ class DashboardInteraction extends BaseInteraction {
         });
     }
 }
-exports.DashboardInteraction = DashboardInteraction;
+exports.DashboardChangeInteraction = DashboardChangeInteraction;
 __exportStar(require("./common"), exports);
