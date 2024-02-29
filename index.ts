@@ -3,7 +3,7 @@ import WebSocket from 'ws';
 import EventEmitter from 'node:events';
 
 /*eslint-disable */
-// ts wont allow shut up if I put any type other than "any" for this or the messageHandlers. maybe theres a way to fix this, but I don't know it.
+// ts wont shut up if I put any type other than "any" for this or the messageHandlers. maybe theres a way to fix this, but I don't know it.
 function getEnumKeyByEnumValue(myEnum: any, enumValue: number): string | null { // {[key: string]: Common.OperationCodes}
 	const keys = Object.keys(myEnum).filter(x => myEnum[x] == enumValue);
 	return keys.length > 0 ? keys[0] : null;
