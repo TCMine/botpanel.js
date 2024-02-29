@@ -68,5 +68,5 @@ client.disconnect();
 ```
 
 ## Information
-Bot Panel is made by @oneandonlyfinbar & @bunnywasnothere. You can join their Discord server here: https://discord.gg/RdPTks5gd9<br>
+Bot Panel (the service that is module is created for) is made by @oneandonlyfinbar & @bunnywasnothere. You can join their Discord server here: https://discord.gg/RdPTks5gd9<br>
 This module is not affiliated or created by the developers of Bot Panel.

@@ -3,7 +3,7 @@ import WebSocket from 'ws';
 import EventEmitter from 'node:events';
 
 /*eslint-disable */
-// ts wont allow shut up if I put any type other than "any" for this or the messageHandlers. maybe theres a way to fix this, but I don't know it.
+// ts wont shut up if I put any type other than "any" for this or the messageHandlers. maybe theres a way to fix this, but I don't know it.
 function getEnumKeyByEnumValue(myEnum: any, enumValue: number): string | null { // {[key: string]: Common.OperationCodes}
 	const keys = Object.keys(myEnum).filter(x => myEnum[x] == enumValue);
 	return keys.length > 0 ? keys[0] : null;
@@ -49,15 +49,15 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 };
 
 /**
- * Represents an authenticated client for Bot Panel
+ * Represents a client for Bot Panel
  * @constructor
 */
 export class Client extends EventEmitter {
-	/** Authentication information for the WebSocket */
+	/** Authentication information for the client */
 	authOptions: Common.AuthenticationData;
-	/** Client WebSocket */
+	/** Client WebSocket  */
 	ws: undefined | WebSocket;
-	/** Whether the Client is currently connected to the WebSocket */
+	/** Whether the client is currently connected to the WebSocket */
 	connected: boolean = false;
 	/** Options for debugging BotPanel.js */
 	debugOptions: undefined | Common.ClientDebugOptions;
@@ -71,7 +71,7 @@ export class Client extends EventEmitter {
 		this.debugOptions = debugOptions;
 	}
 
-	/** Connect to the BotPanel WebSocket and login */
+	/** Connects to the Bot Panel WebSocket and login */
 	async login() {
 		return new Promise<WebSocket | null>((resolve, reject) => {
 			try {
@@ -120,7 +120,7 @@ export class Client extends EventEmitter {
 		if (this.connected) this.ws?.close();
 	}
 	
-	/** Send a message to the WebSocket server (as JSON) */
+	/** Sends a message to the WebSocket server (as JSON) */
 	send(message: object) {this.ws?.send(JSON.stringify(message))};
 }
 
@@ -149,7 +149,7 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 		super(client, options);
 	}
 	/**
-	 * Send an interaction response containing guild information
+	 * Sends an interaction response containing guild information
 	 * @param data Guild info
 	 */
 	async send(info: Common.GuildRequestResponse) {
