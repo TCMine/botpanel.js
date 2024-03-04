@@ -1,5 +1,7 @@
 //import { Client } from './';
 
+export const BP_VERSION = '1.0.0';
+
 export enum OperationCodes {
 	/** Request to authenticate */
 	AUTHENTICATE = 0,
@@ -22,7 +24,18 @@ export enum ComponentType {
 	Text = 'Text',
 	Number = 'Number',
 	Checkbox = 'Checkbox',
-	Select = 'Select'
+	Select = 'Select',
+	TextChannelSelect = 'Text Channel Select',
+	VoiceChannelSelect = 'Voice Channel Select',
+	CategorySelect = 'Category Select',
+	RoleSelect = 'Role Select'
+}
+
+export enum ElementType {
+	TextChannel = 'textChannels',
+	VoiceChannel = 'voiceChannels',
+	Category = 'categories',
+	Role = 'roles'
 }
 
 export type GuildData = number | string | Array<string>
@@ -54,13 +67,13 @@ export interface GuildRequestResponse {
 	/** Bot is in the guild? */
 	inGuild: boolean,
 	/** Formatted list of the guild's text channels */
-	textChannels?: Array<GuildChannelOrRole>,
+	textChannels?: Array<GuildElement>,
 	/** Formatted list of the guild's voice channels */
-	voiceChannels?: Array<GuildChannelOrRole>,
+	voiceChannels?: Array<GuildElement>,
 	/** Formatted list of the guild's category channels */
-	categories?: Array<GuildChannelOrRole>,
+	categories?: Array<GuildElement>,
 	/** Formatted list of the guild's roles */
-	roles?: Array<GuildChannelOrRole>,
+	roles?: Array<GuildElement>,
 }
 
 export interface InteractionResponse {
@@ -70,6 +83,10 @@ export interface InteractionResponse {
 	value: GuildDataChangeInfo['data']
 }
 
+export interface GuildRequestInfo extends InteractionInfo {
+	include: Array<'categories' | 'textChannels' | 'voiceChannels' | 'roles'>
+}
+
 export interface GuildDataChangeInfo extends InteractionInfo {
 	varname: string,
 	data: GuildData,
@@ -77,10 +94,11 @@ export interface GuildDataChangeInfo extends InteractionInfo {
 	inputType: ComponentType.Text | ComponentType.Number | ComponentType.Checkbox | ComponentType.Select
 }
 
-export interface GuildChannelOrRole {
+export interface GuildElement {
 	id: string,
 	name: string,
-	position: number | 0
+	position?: number,
+	managed?: boolean
 }
 
 

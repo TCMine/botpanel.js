@@ -1,7 +1,8 @@
 "use strict";
 //import { Client } from './';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ComponentType = exports.OperationCodes = void 0;
+exports.ElementType = exports.ComponentType = exports.OperationCodes = exports.BP_VERSION = void 0;
+exports.BP_VERSION = '1.0.0';
 var OperationCodes;
 (function (OperationCodes) {
     /** Request to authenticate */
@@ -27,4 +28,15 @@ var ComponentType;
     ComponentType["Number"] = "Number";
     ComponentType["Checkbox"] = "Checkbox";
     ComponentType["Select"] = "Select";
+    ComponentType["TextChannelSelect"] = "Text Channel Select";
+    ComponentType["VoiceChannelSelect"] = "Voice Channel Select";
+    ComponentType["CategorySelect"] = "Category Select";
+    ComponentType["RoleSelect"] = "Role Select";
 })(ComponentType || (exports.ComponentType = ComponentType = {}));
+var ElementType;
+(function (ElementType) {
+    ElementType["TextChannel"] = "textChannels";
+    ElementType["VoiceChannel"] = "voiceChannels";
+    ElementType["Category"] = "categories";
+    ElementType["Role"] = "roles";
+})(ElementType || (exports.ElementType = ElementType = {}));

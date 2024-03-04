@@ -17,7 +17,8 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 			d: {
 				connectAs: client.authOptions.connectAs ?? 'application',
 				applicationId: client.authOptions.id,
-				applicationSecret: client.authOptions.secret
+				applicationSecret: client.authOptions.secret,
+				version: Common.BP_VERSION
 			}
 		}));
 	},
@@ -38,8 +39,8 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 		return data;
 	},
 
-	[Common.OperationCodes.GUILD_INTERACTION]: (client: Client, data: Common.InteractionInfo) => {
-		return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId });
+	[Common.OperationCodes.GUILD_INTERACTION]: (client: Client, data: Common.GuildRequestInfo) => {
+		return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include });
 	},
 
 	[Common.OperationCodes.MODIFY_GUILD_DATA]: (client: Client, data: Common.GuildDataChangeInfo) => {
@@ -76,22 +77,22 @@ export class Client extends EventEmitter {
 		return new Promise<WebSocket | null>((resolve, reject) => {
 			try {
 				const ws = new WebSocket('wss://botpanel.xyz/api/ws');
-				if (this.ws) this.ws.close
+				if (this.ws) this.ws.close;
 				this.ws = ws;
 				this.connected = false;
 				
 				ws.onopen = () => {
 					this.emit('debug', 'Dashboard initialized.');
-					resolve(ws)
+					resolve(ws);
 				};
 				ws.onclose = () => {
 					this.connected = false;
 					this.emit('debug', 'Dashboard closed.');
 					this.emit('close');
-					reject()
+					reject();
 				};
 				ws.onmessage = (event) => {
-					const message: string = event.data.toString()
+					const message: string = event.data.toString();
 					const data: Common.ServerMessage = JSON.parse(message);
 					
 					this.emit('debug', `Message received: ${message}`);
@@ -112,7 +113,7 @@ export class Client extends EventEmitter {
 				this.emit('debug', 'Failed to connect: ' + err);
 				throw err;
 			}
-		})
+		});
 	}
 	
 	/** Closes the WebSocket connection */
@@ -121,7 +122,7 @@ export class Client extends EventEmitter {
 	}
 	
 	/** Sends a message to the WebSocket server (as JSON) */
-	send(message: object) {this.ws?.send(JSON.stringify(message))};
+	send(message: object) {this.ws?.send(JSON.stringify(message));}
 }
 
 export class DashboardInteraction {
@@ -145,8 +146,10 @@ export class DashboardInteraction {
  * Guild information request interaction
 */
 export class DashboardRequestInteraction extends DashboardInteraction {
-	constructor(client: Client, options: Common.InteractionInfo) {
+	requestedElements: Common.GuildRequestInfo['include'];
+	constructor(client: Client, options: Common.GuildRequestInfo) {
 		super(client, options);
+		this.requestedElements = options.include;
 	}
 	/**
 	 * Sends an interaction response containing guild information
@@ -154,8 +157,36 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 	 */
 	async send(info: Common.GuildRequestResponse) {
 		info.data = info.data ?? {};
+
+		// convert array values into strings
 		for (const [key, value] of Object.entries(info.data)) {
 			if (Array.isArray(value)) info.data[key] = value.toString();
+		}
+
+		// check for missing elements
+		const missing: Array<string> = [];
+		for (let i = 0; i < this.requestedElements.length; i++) {
+			const element = this.requestedElements[i];
+			if (!info[element]) {
+				missing.push(element);
+			}
+		}
+
+		if (missing.length > 0) this.client.emit('debug', 'Warning: Guild interaction response missing the following elements: ' + missing.join(', '));
+		
+		// default position values
+		for (const element of this.requestedElements) {
+			if (!info[element]) {
+				continue;
+			}
+		
+			const elements = info[element];
+			if (!elements) continue;
+			for (let i = 0; i < elements.length; i++) {
+				const item = elements[i];
+				item.position = item.position ?? 0;
+				if (element == Common.ElementType.Role) item.managed = item.managed ?? false;
+			}
 		}
 		await new Promise((resolve) => {
 			this.client.ws?.send(JSON.stringify({
@@ -208,7 +239,7 @@ export class DashboardChangeInteraction extends DashboardInteraction {
  	* Sends an interaction response indicating if the change was successful
 	* @param success Was the change successful? (this will be shown to the user)
 	*/
-	async acknowledge(success: boolean = true) {
+	async acknowledge(success: boolean = true, newValue: string | number | Array<string> = this.rawData.data) {
 		if (!this.id) throw Error('Interaction already acknowledged');
 		await new Promise((resolve) => {
 			this.client.ws?.send(JSON.stringify({
@@ -217,7 +248,7 @@ export class DashboardChangeInteraction extends DashboardInteraction {
 					interactionId: this.id,
 					success,
 					key: this.rawData.varname,
-					value: this.rawData.data
+					value: typeof newValue == 'object' ? newValue.join(',') : newValue
 				}
 			}), resolve);
 		});

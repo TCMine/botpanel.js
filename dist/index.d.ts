@@ -3,15 +3,15 @@ import * as Common from './common';
 import WebSocket from 'ws';
 import EventEmitter from 'node:events';
 /**
- * Represents an authenticated client for Bot Panel
+ * Represents a client for Bot Panel
  * @constructor
 */
 export declare class Client extends EventEmitter {
-    /** Authentication information for the WebSocket */
+    /** Authentication information for the client */
     authOptions: Common.AuthenticationData;
-    /** Client WebSocket */
+    /** Client WebSocket  */
     ws: undefined | WebSocket;
-    /** Whether the Client is currently connected to the WebSocket */
+    /** Whether the client is currently connected to the WebSocket */
     connected: boolean;
     /** Options for debugging BotPanel.js */
     debugOptions: undefined | Common.ClientDebugOptions;
@@ -19,11 +19,11 @@ export declare class Client extends EventEmitter {
      * @param options Authentication options
     */
     constructor(options: Common.AuthenticationData, debugOptions?: Common.ClientDebugOptions);
-    /** Connect to the BotPanel WebSocket and login */
+    /** Connects to the Bot Panel WebSocket and login */
     login(): Promise<WebSocket | null>;
     /** Closes the WebSocket connection */
     disconnect(): void;
-    /** Send a message to the WebSocket server (as JSON) */
+    /** Sends a message to the WebSocket server (as JSON) */
     send(message: object): void;
 }
 export declare class DashboardInteraction {
@@ -42,9 +42,10 @@ export declare class DashboardInteraction {
  * Guild information request interaction
 */
 export declare class DashboardRequestInteraction extends DashboardInteraction {
-    constructor(client: Client, options: Common.InteractionInfo);
+    requestedElements: Common.GuildRequestInfo['include'];
+    constructor(client: Client, options: Common.GuildRequestInfo);
     /**
-     * Send an interaction response containing guild information
+     * Sends an interaction response containing guild information
      * @param data Guild info
      */
     send(info: Common.GuildRequestResponse): Promise<void>;
@@ -71,6 +72,6 @@ export declare class DashboardChangeInteraction extends DashboardInteraction {
     * Sends an interaction response indicating if the change was successful
     * @param success Was the change successful? (this will be shown to the user)
     */
-    acknowledge(success?: boolean): Promise<void>;
+    acknowledge(success?: boolean, newValue?: string | number | Array<string>): Promise<void>;
 }
 export * from './common';

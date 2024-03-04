@@ -1,3 +1,4 @@
+export declare const BP_VERSION = "1.0.0";
 export declare enum OperationCodes {
     /** Request to authenticate */
     AUTHENTICATE = 0,
@@ -20,7 +21,17 @@ export declare enum ComponentType {
     Text = "Text",
     Number = "Number",
     Checkbox = "Checkbox",
-    Select = "Select"
+    Select = "Select",
+    TextChannelSelect = "Text Channel Select",
+    VoiceChannelSelect = "Voice Channel Select",
+    CategorySelect = "Category Select",
+    RoleSelect = "Role Select"
+}
+export declare enum ElementType {
+    TextChannel = "textChannels",
+    VoiceChannel = "voiceChannels",
+    Category = "categories",
+    Role = "roles"
 }
 export type GuildData = number | string | Array<string>;
 export interface ServerMessage {
@@ -47,13 +58,13 @@ export interface GuildRequestResponse {
     /** Bot is in the guild? */
     inGuild: boolean;
     /** Formatted list of the guild's text channels */
-    textChannels?: Array<GuildChannelOrRole>;
+    textChannels?: Array<GuildElement>;
     /** Formatted list of the guild's voice channels */
-    voiceChannels?: Array<GuildChannelOrRole>;
+    voiceChannels?: Array<GuildElement>;
     /** Formatted list of the guild's category channels */
-    categories?: Array<GuildChannelOrRole>;
+    categories?: Array<GuildElement>;
     /** Formatted list of the guild's roles */
-    roles?: Array<GuildChannelOrRole>;
+    roles?: Array<GuildElement>;
 }
 export interface InteractionResponse {
     interactionId: string;
@@ -61,16 +72,20 @@ export interface InteractionResponse {
     key: GuildDataChangeInfo['varname'];
     value: GuildDataChangeInfo['data'];
 }
+export interface GuildRequestInfo extends InteractionInfo {
+    include: Array<'categories' | 'textChannels' | 'voiceChannels' | 'roles'>;
+}
 export interface GuildDataChangeInfo extends InteractionInfo {
     varname: string;
     data: GuildData;
     userId: string;
     inputType: ComponentType.Text | ComponentType.Number | ComponentType.Checkbox | ComponentType.Select;
 }
-export interface GuildChannelOrRole {
+export interface GuildElement {
     id: string;
     name: string;
-    position: number | 0;
+    position?: number;
+    managed?: boolean;
 }
 export interface AuthenticationData {
     /** ID of the client */

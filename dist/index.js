@@ -43,7 +43,7 @@ const Common = __importStar(require("./common"));
 const ws_1 = __importDefault(require("ws"));
 const node_events_1 = __importDefault(require("node:events"));
 /*eslint-disable */
-// ts wont allow shut up if I put any type other than "any" for this or the messageHandlers. maybe theres a way to fix this, but I don't know it.
+// ts wont shut up if I put any type other than "any" for this or the messageHandlers. maybe theres a way to fix this, but I don't know it.
 function getEnumKeyByEnumValue(myEnum, enumValue) {
     const keys = Object.keys(myEnum).filter(x => myEnum[x] == enumValue);
     return keys.length > 0 ? keys[0] : null;
@@ -57,7 +57,8 @@ const messageHandlers = {
             d: {
                 connectAs: (_b = client.authOptions.connectAs) !== null && _b !== void 0 ? _b : 'application',
                 applicationId: client.authOptions.id,
-                applicationSecret: client.authOptions.secret
+                applicationSecret: client.authOptions.secret,
+                version: Common.BP_VERSION
             }
         }));
     },
@@ -82,14 +83,14 @@ const messageHandlers = {
         return data;
     },
     [Common.OperationCodes.GUILD_INTERACTION]: (client, data) => {
-        return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId });
+        return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include });
     },
     [Common.OperationCodes.MODIFY_GUILD_DATA]: (client, data) => {
         return new DashboardChangeInteraction(client, data);
     }
 };
 /**
- * Represents an authenticated client for Bot Panel
+ * Represents a client for Bot Panel
  * @constructor
 */
 class Client extends node_events_1.default {
@@ -98,12 +99,12 @@ class Client extends node_events_1.default {
     */
     constructor(options, debugOptions) {
         super();
-        /** Whether the Client is currently connected to the WebSocket */
+        /** Whether the client is currently connected to the WebSocket */
         this.connected = false;
         this.authOptions = options;
         this.debugOptions = debugOptions;
     }
-    /** Connect to the BotPanel WebSocket and login */
+    /** Connects to the Bot Panel WebSocket and login */
     login() {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
@@ -154,9 +155,8 @@ class Client extends node_events_1.default {
         if (this.connected)
             (_a = this.ws) === null || _a === void 0 ? void 0 : _a.close();
     }
-    /** Send a message to the WebSocket server (as JSON) */
+    /** Sends a message to the WebSocket server (as JSON) */
     send(message) { var _a; (_a = this.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify(message)); }
-    ;
 }
 exports.Client = Client;
 class DashboardInteraction {
@@ -173,18 +173,45 @@ exports.DashboardInteraction = DashboardInteraction;
 class DashboardRequestInteraction extends DashboardInteraction {
     constructor(client, options) {
         super(client, options);
+        this.requestedElements = options.include;
     }
     /**
-     * Send an interaction response containing guild information
+     * Sends an interaction response containing guild information
      * @param data Guild info
      */
     send(info) {
-        var _a;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             info.data = (_a = info.data) !== null && _a !== void 0 ? _a : {};
+            // convert array values into strings
             for (const [key, value] of Object.entries(info.data)) {
                 if (Array.isArray(value))
                     info.data[key] = value.toString();
+            }
+            // check for missing elements
+            const missing = [];
+            for (let i = 0; i < this.requestedElements.length; i++) {
+                const element = this.requestedElements[i];
+                if (!info[element]) {
+                    missing.push(element);
+                }
+            }
+            if (missing.length > 0)
+                this.client.emit('debug', 'Warning: Guild interaction response missing the following elements: ' + missing.join(', '));
+            // default position values
+            for (const element of this.requestedElements) {
+                if (!info[element]) {
+                    continue;
+                }
+                const elements = info[element];
+                if (!elements)
+                    continue;
+                for (let i = 0; i < elements.length; i++) {
+                    const item = elements[i];
+                    item.position = (_b = item.position) !== null && _b !== void 0 ? _b : 0;
+                    if (element == Common.ElementType.Role)
+                        item.managed = (_c = item.managed) !== null && _c !== void 0 ? _c : false;
+                }
             }
             yield new Promise((resolve) => {
                 var _a, _b, _c, _d, _e;
@@ -227,7 +254,7 @@ class DashboardChangeInteraction extends DashboardInteraction {
     * Sends an interaction response indicating if the change was successful
     * @param success Was the change successful? (this will be shown to the user)
     */
-    acknowledge(success = true) {
+    acknowledge(success = true, newValue = this.rawData.data) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.id)
                 throw Error('Interaction already acknowledged');
@@ -239,7 +266,7 @@ class DashboardChangeInteraction extends DashboardInteraction {
                         interactionId: this.id,
                         success,
                         key: this.rawData.varname,
-                        value: this.rawData.data
+                        value: typeof newValue == 'object' ? newValue.join(',') : newValue
                     }
                 }), resolve);
             });
