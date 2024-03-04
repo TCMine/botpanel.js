@@ -238,6 +238,7 @@ export class DashboardChangeInteraction extends DashboardInteraction {
 	/**
  	* Sends an interaction response indicating if the change was successful
 	* @param success Was the change successful? (this will be shown to the user)
+	* @param newValue Optional new value to display on the dashboard input
 	*/
 	async acknowledge(success: boolean = true, newValue: string | number | Array<string> = this.rawData.data) {
 		if (!this.id) throw Error('Interaction already acknowledged');
