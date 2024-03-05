@@ -58,7 +58,9 @@ client.on('MODIFY_GUILD_DATA', (interaction: DashboardChangeInteraction) => {
 });
 ```
 > These interactions hold the ID of the guild (`guildId`), dashboard user (`userId`) and information of the input, such as the `name`, `type` and `value`, inside an object (`input`).<br>
->  The interaction is acknowledged with the `.acknowledge()` method to display a success message. `false` can be used as a parameter to display an error message to the user instead.
+>  The interaction is acknowledged with the `.acknowledge()` method to display a success message. This method has two optional parameters.<br>
+>> `success?` is a boolean value that determines whether to show an input success or failure message on the dashboard.<br>
+>> `newValue?` is a (string, number, string[]) value that replaces the user's input on the dashboard after saving.
 
 ### Disconnecting the client
 The client can be disconnected with `.disconnect()`.
