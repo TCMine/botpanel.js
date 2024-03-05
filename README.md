@@ -44,9 +44,13 @@ client.on('GUILD_INTERACTION', (interaction: DashboardRequestInteraction) => {
 ```
 > The ID of the accessed guild can be accessed from the interaction (`guildId`).<br>
 > Use `.send()` to return an object of the requested guild information. This must be used for every guild interaction event or no dashboard will be shown.<br>
->> The entries shown are as followed:<br>
->> `inGuild` : Whether the bot is in the guild or not. If this is false, the dashboard will display a message to the user instead of the dashboard's inputs.<br>
->> `data` : Object containing entries with the input names as keys and their input values as values. If present, this will be used to display the currently set data on the dashboard.
+>> The object parameter can contain the following entries:<br>
+>> `inGuild: boolean` : Whether the bot is in the guild or not. If this is false, the dashboard will display a message to the user instead of the dashboard's inputs.<br>
+>> `data: object` : Object containing entries with the input names as keys and their input values as values. If present, this will be used to display the currently set data on the dashboard.<br>
+>> ### Guild Elements<br>
+>> These values should be used when requested by the guild interaction. An array of names for the requested elements is stored in `.requestedElements`: **`textChannels`, `voiceChannels`, `categories`, `roles`**<br>
+>> These entries must hold an array of objects with a `name: string` and `id: string`. You may optionally specify a `position: number`, for better sorting on the dashboard.<br>
+>> Role objects have an optional `managed: boolean` key for bot roles.<br>
 
 `Dashboard Change Interaction` (emitted through `MODIFY_GUILD_DATA`):
 ```ts
@@ -59,7 +63,7 @@ client.on('MODIFY_GUILD_DATA', (interaction: DashboardChangeInteraction) => {
 ```
 > These interactions hold the ID of the guild (`guildId`), dashboard user (`userId`) and information of the input, such as the `name`, `type` and `value`, inside an object (`input`).<br>
 >  The interaction is acknowledged with the `.acknowledge()` method to display a success message. This method has two optional parameters.<br>
->> `success?` is a boolean value that determines whether to show an input success or failure message on the dashboard.<br>
+>> `success?: boolean` is a boolean value that determines whether to show an input success or failure message on the dashboard.<br>
 >> `newValue?` is a (string, number, string[]) value that replaces the user's input on the dashboard after saving.
 
 ### Disconnecting the client
