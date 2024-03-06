@@ -176,10 +176,6 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 		
 		// default position values
 		for (const element of this.requestedElements) {
-			if (!info[element]) {
-				continue;
-			}
-		
 			const elements = info[element];
 			if (!elements) continue;
 			for (let i = 0; i < elements.length; i++) {
