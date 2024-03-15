@@ -156,7 +156,7 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 	 * @param data Guild info
 	 */
 	async send(info: Common.GuildRequestResponse) {
-		info.data = info.data ?? {};
+		info.data ??= {};
 
 		// convert array values into strings
 		for (const [key, value] of Object.entries(info.data)) {
