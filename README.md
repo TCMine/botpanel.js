@@ -1,5 +1,5 @@
 # <img src="https://github.com/TCMine/botpanel.js/assets/32180878/0a68087d-e9e5-43fd-9a92-d2cee58f5cef" alt="drawing" width="50"/> BotPanel.js
-![NPM Version](https://img.shields.io/npm/v/botpanel.js) ![NPM Unpacked Size](https://img.shields.io/npm/unpacked-size/botpanel.js) ![GitHub License](https://img.shields.io/github/license/tcmine/botpanel.js) ![finbar](https://img.shields.io/badge/finbar%20approved-%28probably%29-red)
+![NPM Version](https://img.shields.io/npm/v/botpanel.js) ![NPM Unpacked Size](https://img.shields.io/npm/unpacked-size/botpanel.js) ![GitHub License](https://img.shields.io/github/license/tcmine/botpanel.js) ![finbar](https://img.shields.io/badge/finbar%20approved-%28confirmed!%29-red)
 
 BotPanel.js is a simple JavaScript/TypeScript library for integrating Discord bots with [Bot Panel](https://botpanel.xyz), the bot dashboard creation platform.
 
@@ -74,5 +74,5 @@ client.disconnect();
 ```
 
 ## Information
-Bot Panel (the service that is module is created for) is made by @oneandonlyfinbar & @bunnywasnothere. You can join their Discord server here: https://discord.gg/RdPTks5gd9<br>
+Bot Panel (the service that this module is made for) is made by @oneandonlyfinbar & @bunnywasnothere. You can join their Discord server here: https://discord.gg/RdPTks5gd9<br>
 This module is not affiliated or created by the developers of Bot Panel.
