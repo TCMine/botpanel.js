@@ -3,6 +3,13 @@
 
 BotPanel.js is a simple JavaScript/TypeScript library for integrating Discord bots with [Bot Panel](https://botpanel.xyz), the bot dashboard creation platform.
 
+## Installation
+
+Install with NPM
+```cmd
+npm install botpanel.js
+```
+
 ## Example Usage
 
 ### Creating and authenticating a client
@@ -55,16 +62,17 @@ client.on('GUILD_INTERACTION', (interaction: DashboardRequestInteraction) => {
 `Dashboard Change Interaction` (emitted through `MODIFY_GUILD_DATA`):
 ```ts
 client.on('MODIFY_GUILD_DATA', (interaction: DashboardChangeInteraction) => {
-    if (interaction.input.type == ComponentType.Text && interaction.input.value.length < 6) return interaction.acknowledge(false);
+    if (interaction.input.type == ComponentType.Text && interaction.input.value.length < 6) return interaction.acknowledge({success: false, message: "Text is too small!"});
     allGuildData[interaction.guildId][interaction.input.name] = interaction.input.value;
     interaction.acknowledge();
     console.log(`User (${interaction.userId}) changed guild data "${interaction.input.name}"!`);
 });
 ```
 > These interactions hold the ID of the guild (`guildId`), dashboard user (`userId`) and information of the input, such as the `name`, `type` and `value`, inside an object (`input`).<br>
->  The interaction is acknowledged with the `.acknowledge()` method to display a success message. This method has two optional parameters.<br>
->> `success?: boolean` is a boolean value that determines whether to show an input success or failure message on the dashboard.<br>
->> `newValue?` is a (string, number, string[]) value that replaces the user's input on the dashboard after saving.
+>  The interaction is acknowledged with the `.acknowledge()` method to display a success message. This method accepts an object containing these entries:<br>
+>> `success?: boolean` is a boolean value that determines whether to show an input success or failure message on the dashboard. This is `true` by default<br>
+>> `message?: string` is a string that displays a custom response message on the user's dashboard.
+>> `newValue?` is a (string, number, string[]) value that replaces the user's input on the dashboard after saving. This does not work when `success` is `false`.
 
 ### Disconnecting the client
 The client can be disconnected with `.disconnect()`.
