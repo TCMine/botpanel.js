@@ -1,4 +1,4 @@
-export declare const BP_VERSION = "1.0.0";
+export declare const BP_VERSION = "1.1.0";
 export declare enum OperationCodes {
     /** Request to authenticate */
     AUTHENTICATE = 0,
@@ -96,4 +96,9 @@ export interface AuthenticationData {
 }
 export interface ClientDebugOptions {
     logHeartbeat?: boolean;
+}
+export interface AcknowledgementData {
+    success?: boolean;
+    message?: string | undefined;
+    newValue?: string | number | Array<string>;
 }

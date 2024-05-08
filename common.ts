@@ -1,6 +1,6 @@
 //import { Client } from './';
 
-export const BP_VERSION = '1.0.0';
+export const BP_VERSION = '1.1.0';
 
 export enum OperationCodes {
 	/** Request to authenticate */
@@ -115,4 +115,10 @@ export interface AuthenticationData {
 
 export interface ClientDebugOptions {
 	logHeartbeat?: boolean
+}
+
+export interface AcknowledgementData {
+	success?: boolean,
+	message?: string | undefined,
+	newValue?: string | number | Array<string>
 }

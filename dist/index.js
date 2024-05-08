@@ -79,8 +79,11 @@ const messageHandlers = {
     },
     [Common.OperationCodes.ERROR]: (client, data) => {
         if (!client.connected)
-            throw Error(data.error), client.emit('debug', 'Failed to authenticate');
-        return data;
+            client.emit('debug', 'Failed to authenticate');
+        let error = data.error;
+        if (error.toLowerCase().includes('invalid websocket version'))
+            error = 'Outdated version. Please update BotPanel.js.';
+        throw Error(error);
     },
     [Common.OperationCodes.GUILD_INTERACTION]: (client, data) => {
         return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include });
@@ -109,7 +112,7 @@ class Client extends node_events_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
                 try {
-                    const ws = new ws_1.default('wss://botpanel.xyz/api/ws');
+                    const ws = new ws_1.default('wss://wss.botpanel.xyz');
                     if (this.ws)
                         this.ws.close;
                     this.ws = ws;
@@ -137,7 +140,8 @@ class Client extends node_events_1.default {
                             dataToSend = v(this, data.d, this.debugOptions);
                         }
                         catch (err) {
-                            this.emit('debug', `Error: [${Common.OperationCodes[data.op]}]: ${err}`);
+                            this.emit('debug', `[${Common.OperationCodes[data.op]}]: ${err}`);
+                            throw err;
                         }
                         this.emit((_a = getEnumKeyByEnumValue(Common.OperationCodes, data.op)) !== null && _a !== void 0 ? _a : data.op.toString(), dataToSend);
                     };
@@ -182,7 +186,7 @@ class DashboardRequestInteraction extends DashboardInteraction {
     send(info) {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
-            info.data = (_a = info.data) !== null && _a !== void 0 ? _a : {};
+            (_a = info.data) !== null && _a !== void 0 ? _a : (info.data = {});
             // convert array values into strings
             for (const [key, value] of Object.entries(info.data)) {
                 if (Array.isArray(value))
@@ -200,9 +204,6 @@ class DashboardRequestInteraction extends DashboardInteraction {
                 this.client.emit('debug', 'Warning: Guild interaction response missing the following elements: ' + missing.join(', '));
             // default position values
             for (const element of this.requestedElements) {
-                if (!info[element]) {
-                    continue;
-                }
                 const elements = info[element];
                 if (!elements)
                     continue;
@@ -253,21 +254,22 @@ class DashboardChangeInteraction extends DashboardInteraction {
     /**
     * Sends an interaction response indicating if the change was successful
     * @param success Was the change successful? (this will be shown to the user)
-    * @param newValue Optional new value to display on the dashboard input
+    * @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
     */
-    acknowledge(success = true, newValue = this.rawData.data) {
+    acknowledge(data) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.id)
                 throw Error('Interaction already acknowledged');
             yield new Promise((resolve) => {
-                var _a;
+                var _a, _b;
                 (_a = this.client.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
                     op: Common.OperationCodes.ACKNOWLEDGE_INTERACTION,
                     d: {
                         interactionId: this.id,
-                        success,
+                        success: (_b = data === null || data === void 0 ? void 0 : data.success) !== null && _b !== void 0 ? _b : true,
+                        message: data === null || data === void 0 ? void 0 : data.message,
                         key: this.rawData.varname,
-                        value: typeof newValue == 'object' ? newValue.join(',') : newValue
+                        value: (data === null || data === void 0 ? void 0 : data.newValue) ? (typeof (data === null || data === void 0 ? void 0 : data.newValue) == 'object' ? data === null || data === void 0 ? void 0 : data.newValue.join(',') : data === null || data === void 0 ? void 0 : data.newValue) : this.rawData.data
                     }
                 }), resolve);
             });

@@ -71,8 +71,8 @@ export declare class DashboardChangeInteraction extends DashboardInteraction {
     /**
     * Sends an interaction response indicating if the change was successful
     * @param success Was the change successful? (this will be shown to the user)
-    * @param newValue Optional new value to display on the dashboard input
+    * @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
     */
-    acknowledge(success?: boolean, newValue?: string | number | Array<string>): Promise<void>;
+    acknowledge(data?: Common.AcknowledgementData): Promise<void>;
 }
 export * from './common';

@@ -35,8 +35,10 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 		return data;
 	},
 	[Common.OperationCodes.ERROR]: (client: Client, data: Common.ServerResponseError) => {
-		if (!client.connected) throw Error(data.error), client.emit('debug', 'Failed to authenticate');
-		return data;
+		if (!client.connected) client.emit('debug', 'Failed to authenticate');
+		let error = data.error;
+		if (error.toLowerCase().includes('invalid websocket version')) error = 'Outdated version. Please update BotPanel.js.';
+		throw Error(error);
 	},
 
 	[Common.OperationCodes.GUILD_INTERACTION]: (client: Client, data: Common.GuildRequestInfo) => {
@@ -104,7 +106,8 @@ export class Client extends EventEmitter {
 					try {
 						dataToSend = v(this, data.d, this.debugOptions);
 					} catch (err) {
-						this.emit('debug', `Error: [${Common.OperationCodes[data.op]}]: ${err}`);
+						this.emit('debug', `[${Common.OperationCodes[data.op]}]: ${err}`);
+						throw err;
 					}
 					
 					this.emit(getEnumKeyByEnumValue(Common.OperationCodes, data.op) ?? data.op.toString(), dataToSend);
@@ -234,18 +237,19 @@ export class DashboardChangeInteraction extends DashboardInteraction {
 	/**
  	* Sends an interaction response indicating if the change was successful
 	* @param success Was the change successful? (this will be shown to the user)
-	* @param newValue Optional new value to display on the dashboard input
+	* @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
 	*/
-	async acknowledge(success: boolean = true, newValue: string | number | Array<string> = this.rawData.data) {
+	async acknowledge(data?: Common.AcknowledgementData) {
 		if (!this.id) throw Error('Interaction already acknowledged');
 		await new Promise((resolve) => {
 			this.client.ws?.send(JSON.stringify({
 				op: Common.OperationCodes.ACKNOWLEDGE_INTERACTION,
 				d: {
 					interactionId: this.id,
-					success,
+					success: data?.success ?? true,
+					message: data?.message,
 					key: this.rawData.varname,
-					value: typeof newValue == 'object' ? newValue.join(',') : newValue
+					value: data?.newValue ? (typeof data?.newValue == 'object' ? data?.newValue.join(',') : data?.newValue) : this.rawData.data
 				}
 			}), resolve);
 		});

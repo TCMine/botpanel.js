@@ -2,7 +2,7 @@
 //import { Client } from './';
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ElementType = exports.ComponentType = exports.OperationCodes = exports.BP_VERSION = void 0;
-exports.BP_VERSION = '1.0.0';
+exports.BP_VERSION = '1.1.0';
 var OperationCodes;
 (function (OperationCodes) {
     /** Request to authenticate */
