@@ -78,7 +78,7 @@ export class Client extends EventEmitter {
 	async login() {
 		return new Promise<WebSocket | null>((resolve, reject) => {
 			try {
-				const ws = new WebSocket('wss://wss.botpanel.xyz');
+				const ws = new WebSocket(this.authOptions.wss ?? 'wss://wss.botpanel.xyz');
 				if (this.ws) this.ws.close;
 				this.ws = ws;
 				this.connected = false;
