@@ -82,7 +82,7 @@ const messageHandlers = {
             client.emit('debug', 'Failed to authenticate');
         let error = data.error;
         if (error.toLowerCase().includes('invalid websocket version'))
-            error = 'Outdated version. Please update BotPanel.js.';
+            error = 'Outdated WebSocket server version. Please update BotPanel.js.';
         throw Error(error);
     },
     [Common.OperationCodes.GUILD_INTERACTION]: (client, data) => {

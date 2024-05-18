@@ -37,14 +37,12 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 	[Common.OperationCodes.ERROR]: (client: Client, data: Common.ServerResponseError) => {
 		if (!client.connected) client.emit('debug', 'Failed to authenticate');
 		let error = data.error;
-		if (error.toLowerCase().includes('invalid websocket version')) error = 'Outdated version. Please update BotPanel.js.';
+		if (error.toLowerCase().includes('invalid websocket version')) error = 'Outdated WebSocket server version. Please update BotPanel.js.';
 		throw Error(error);
 	},
-
 	[Common.OperationCodes.GUILD_INTERACTION]: (client: Client, data: Common.GuildRequestInfo) => {
 		return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include });
 	},
-
 	[Common.OperationCodes.MODIFY_GUILD_DATA]: (client: Client, data: Common.GuildDataChangeInfo) => {
 		return new DashboardChangeInteraction(client, data);
 	}
