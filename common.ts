@@ -108,7 +108,9 @@ export interface AuthenticationData {
 	/** Secret key of the client (do not share this) */
 	secret: string,
 	/** Custom WebSocket server URL (you should only use a trusted server) */
-	wss?: string
+	wss?: string,
+	/** (Using this option may cause errors; not supported) */
+	wssVersionOverride?: string,
 	connectAs?: 'application', // "browser" not supported
 
 }

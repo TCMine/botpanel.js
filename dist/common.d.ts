@@ -94,6 +94,8 @@ export interface AuthenticationData {
     secret: string;
     /** Custom WebSocket server URL (you should only use a trusted server) */
     wss?: string;
+    /** (Using this option may cause errors; not supported) */
+    wssVersionOverride?: string;
     connectAs?: 'application';
 }
 export interface ClientDebugOptions {

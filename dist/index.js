@@ -51,14 +51,14 @@ function getEnumKeyByEnumValue(myEnum, enumValue) {
 const messageHandlers = {
     /*eslint-enable */
     [Common.OperationCodes.AUTHENTICATE]: (client) => {
-        var _a, _b;
+        var _a, _b, _c;
         (_a = client.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
             op: Common.OperationCodes.AUTHENTICATE,
             d: {
                 connectAs: (_b = client.authOptions.connectAs) !== null && _b !== void 0 ? _b : 'application',
                 applicationId: client.authOptions.id,
                 applicationSecret: client.authOptions.secret,
-                version: Common.BP_VERSION
+                version: (_c = client.authOptions.wssVersionOverride) !== null && _c !== void 0 ? _c : Common.BP_VERSION
             }
         }));
     },
@@ -111,8 +111,9 @@ class Client extends node_events_1.default {
     login() {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
+                var _a;
                 try {
-                    const ws = new ws_1.default(this.authOptions.wss ? 'wss://' + this.authOptions.wss : 'wss://wss.botpanel.xyz');
+                    const ws = new ws_1.default((_a = this.authOptions.wss) !== null && _a !== void 0 ? _a : 'wss://wss.botpanel.xyz');
                     if (this.ws)
                         this.ws.close;
                     this.ws = ws;

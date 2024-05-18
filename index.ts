@@ -18,7 +18,7 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 				connectAs: client.authOptions.connectAs ?? 'application',
 				applicationId: client.authOptions.id,
 				applicationSecret: client.authOptions.secret,
-				version: Common.BP_VERSION
+				version: client.authOptions.wssVersionOverride ?? Common.BP_VERSION
 			}
 		}));
 	},
@@ -78,7 +78,7 @@ export class Client extends EventEmitter {
 	async login() {
 		return new Promise<WebSocket | null>((resolve, reject) => {
 			try {
-				const ws = new WebSocket(this.authOptions.wss ? 'wss://'+this.authOptions.wss : 'wss://wss.botpanel.xyz');
+				const ws = new WebSocket(this.authOptions.wss ?? 'wss://wss.botpanel.xyz');
 				if (this.ws) this.ws.close; 
 				this.ws = ws;
 				this.connected = false;
