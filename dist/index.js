@@ -111,9 +111,8 @@ class Client extends node_events_1.default {
     login() {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
-                var _a;
                 try {
-                    const ws = new ws_1.default((_a = this.authOptions.wss) !== null && _a !== void 0 ? _a : 'wss://wss.botpanel.xyz');
+                    const ws = new ws_1.default(this.authOptions.wss ? 'wss://' + this.authOptions.wss : 'wss://wss.botpanel.xyz');
                     if (this.ws)
                         this.ws.close;
                     this.ws = ws;
