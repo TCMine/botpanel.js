@@ -126,6 +126,7 @@ class Client extends node_events_1.default {
                         var _a;
                         this.connected = false;
                         this.emit('debug', 'Connection closed.');
+                        console.log();
                         this.emit('close');
                         if (event.code != 1005 && !((_a = this.debugOptions) === null || _a === void 0 ? void 0 : _a.disableAutoReconnect)) {
                             this.emit('debug', 'Reconnecting to WebSocket in 5 seconds.');
@@ -140,7 +141,6 @@ class Client extends node_events_1.default {
                         var _a;
                         const message = event.data.toString();
                         const data = JSON.parse(message);
-                        this.emit('debug', `Message received: ${message}`);
                         let dataToSend;
                         const v = messageHandlers[data.op];
                         if (!v)

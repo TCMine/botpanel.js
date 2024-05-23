@@ -88,6 +88,7 @@ export class Client extends EventEmitter {
 				ws.onclose = (event) => {
 					this.connected = false;
 					this.emit('debug', 'Connection closed.');
+					console.log()
 					this.emit('close');
 					if (event.code != 1005 && !this.debugOptions?.disableAutoReconnect) {
 						this.emit('debug', 'Reconnecting to WebSocket in 5 seconds.');
@@ -103,8 +104,6 @@ export class Client extends EventEmitter {
 				ws.onmessage = (event) => {
 					const message: string = event.data.toString();
 					const data: Common.ServerMessage = JSON.parse(message);
-					
-					this.emit('debug', `Message received: ${message}`);
 
 					let dataToSend;
 					const v = messageHandlers[data.op];
