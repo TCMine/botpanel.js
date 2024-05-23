@@ -141,6 +141,7 @@ class Client extends node_events_1.default {
                         var _a;
                         const message = event.data.toString();
                         const data = JSON.parse(message);
+                        this.emit('message', message);
                         let dataToSend;
                         const v = messageHandlers[data.op];
                         if (!v)

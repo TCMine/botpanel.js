@@ -104,6 +104,8 @@ export class Client extends EventEmitter {
 				ws.onmessage = (event) => {
 					const message: string = event.data.toString();
 					const data: Common.ServerMessage = JSON.parse(message);
+					
+					this.emit('message', message);
 
 					let dataToSend;
 					const v = messageHandlers[data.op];
