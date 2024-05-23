@@ -110,7 +110,7 @@ class Client extends node_events_1.default {
     /** Connects to the Bot Panel WebSocket and login */
     login() {
         return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 var _a;
                 try {
                     const ws = new ws_1.default((_a = this.authOptions.wss) !== null && _a !== void 0 ? _a : 'wss://wss.botpanel.xyz');
@@ -119,15 +119,23 @@ class Client extends node_events_1.default {
                     this.ws = ws;
                     this.connected = false;
                     ws.onopen = () => {
-                        this.emit('debug', 'Dashboard initialized.');
+                        this.emit('debug', 'Connection initialized.');
                         resolve(ws);
                     };
-                    ws.onclose = () => {
+                    ws.onclose = (event) => {
+                        var _a;
                         this.connected = false;
-                        this.emit('debug', 'Dashboard closed.');
+                        this.emit('debug', 'Connection closed.');
                         this.emit('close');
-                        reject();
+                        if (event.code != 1005 && !((_a = this.debugOptions) === null || _a === void 0 ? void 0 : _a.disableAutoReconnect)) {
+                            this.emit('debug', 'Reconnecting to WebSocket in 5 seconds.');
+                            setTimeout(() => { this.login(); }, 5000);
+                        }
                     };
+                    ws.on('error', (err) => {
+                        console.error('WebSocket', err);
+                        ws.close();
+                    });
                     ws.onmessage = (event) => {
                         var _a;
                         const message = event.data.toString();

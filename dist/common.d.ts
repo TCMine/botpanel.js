@@ -100,6 +100,7 @@ export interface AuthenticationData {
 }
 export interface ClientDebugOptions {
     logHeartbeat?: boolean;
+    disableAutoReconnect?: boolean;
 }
 export interface AcknowledgementData {
     success?: boolean;

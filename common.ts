@@ -118,7 +118,8 @@ export interface AuthenticationData {
 // BotPanel.js Custom
 
 export interface ClientDebugOptions {
-	logHeartbeat?: boolean
+	logHeartbeat?: boolean,
+	disableAutoReconnect?: boolean
 }
 
 export interface AcknowledgementData {

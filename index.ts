@@ -74,7 +74,7 @@ export class Client extends EventEmitter {
 
 	/** Connects to the Bot Panel WebSocket and login */
 	async login() {
-		return new Promise<WebSocket | null>((resolve, reject) => {
+		return new Promise<WebSocket | null>((resolve) => {
 			try {
 				const ws = new WebSocket(this.authOptions.wss ?? 'wss://wss.botpanel.xyz');
 				if (this.ws) this.ws.close; 
@@ -82,15 +82,24 @@ export class Client extends EventEmitter {
 				this.connected = false;
 				
 				ws.onopen = () => {
-					this.emit('debug', 'Dashboard initialized.');
+					this.emit('debug', 'Connection initialized.');
 					resolve(ws);
 				};
-				ws.onclose = () => {
+				ws.onclose = (event) => {
 					this.connected = false;
-					this.emit('debug', 'Dashboard closed.');
+					this.emit('debug', 'Connection closed.');
 					this.emit('close');
-					reject();
+					if (event.code != 1005 && !this.debugOptions?.disableAutoReconnect) {
+						this.emit('debug', 'Reconnecting to WebSocket in 5 seconds.');
+						setTimeout(()=>{this.login();},5000);
+					}		
 				};
+
+				ws.on('error', (err) => {
+					console.error('WebSocket', err);
+					ws.close();
+				});
+
 				ws.onmessage = (event) => {
 					const message: string = event.data.toString();
 					const data: Common.ServerMessage = JSON.parse(message);
