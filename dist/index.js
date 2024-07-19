@@ -67,7 +67,7 @@ const messageHandlers = {
         client.emit('debug', `Successfully authenticated with application "${data.name}" (${client.authOptions.id})`);
         if (debugOptions === null || debugOptions === void 0 ? void 0 : debugOptions.logHeartbeat)
             client.emit('debug', 'Heartbeat interval set to ' + data.heartbeatInterval);
-        setInterval(() => {
+        client.heartbeatInterval = setInterval(() => {
             var _a;
             (_a = client.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
                 op: Common.OperationCodes.HEARTBEAT
@@ -124,9 +124,9 @@ class Client extends node_events_1.default {
                     };
                     ws.onclose = (event) => {
                         var _a;
+                        clearInterval(this.heartbeatInterval);
                         this.connected = false;
                         this.emit('debug', 'Connection closed.');
-                        console.log();
                         this.emit('close');
                         if (event.code != 1005 && !((_a = this.debugOptions) === null || _a === void 0 ? void 0 : _a.disableAutoReconnect)) {
                             this.emit('debug', 'Reconnecting to WebSocket in 5 seconds.');
@@ -143,11 +143,11 @@ class Client extends node_events_1.default {
                         const data = JSON.parse(message);
                         this.emit('message', message);
                         let dataToSend;
-                        const v = messageHandlers[data.op];
-                        if (!v)
+                        const eventHandler = messageHandlers[data.op];
+                        if (!eventHandler)
                             return;
                         try {
-                            dataToSend = v(this, data.d, this.debugOptions);
+                            dataToSend = eventHandler(this, data.d, this.debugOptions);
                         }
                         catch (err) {
                             this.emit('debug', `[${Common.OperationCodes[data.op]}]: ${err}`);
@@ -211,7 +211,7 @@ class DashboardRequestInteraction extends DashboardInteraction {
                 }
             }
             if (missing.length > 0)
-                this.client.emit('debug', 'Warning: Guild interaction response missing the following elements: ' + missing.join(', '));
+                this.client.emit('debug', 'Warning: Guild interaction response is missing the following elements: ' + missing.join(', '));
             // default position values
             for (const element of this.requestedElements) {
                 const elements = info[element];

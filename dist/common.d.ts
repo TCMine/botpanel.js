@@ -65,6 +65,10 @@ export interface GuildRequestResponse {
     categories?: Array<GuildElement>;
     /** Formatted list of the guild's roles */
     roles?: Array<GuildElement>;
+    /** Object of variables for use in the client dashboard */
+    variables?: {
+        [key: string]: DynamicSelectOption[] | number | string;
+    };
 }
 export interface InteractionResponse {
     interactionId: string;
@@ -86,6 +90,11 @@ export interface GuildElement {
     name: string;
     position?: number;
     managed?: boolean;
+}
+export interface DynamicSelectOption {
+    icon?: string;
+    name: string;
+    value: string;
 }
 export interface AuthenticationData {
     /** ID of the client */

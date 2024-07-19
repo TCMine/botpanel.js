@@ -26,7 +26,7 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 		client.connected = true;
 		client.emit('debug', `Successfully authenticated with application "${data.name}" (${client.authOptions.id})`);
 		if (debugOptions?.logHeartbeat) client.emit('debug', 'Heartbeat interval set to ' + data.heartbeatInterval);
-		setInterval(() => {
+		client.heartbeatInterval = setInterval(() => {
 			client.ws?.send(JSON.stringify({
 				op: Common.OperationCodes.HEARTBEAT
 			}));
@@ -62,6 +62,7 @@ export class Client extends EventEmitter {
 	connected: boolean = false;
 	/** Options for debugging BotPanel.js */
 	debugOptions: undefined | Common.ClientDebugOptions;
+	heartbeatInterval: undefined | NodeJS.Timeout;
 
 	/**
 	 * @param options Authentication options
@@ -86,9 +87,9 @@ export class Client extends EventEmitter {
 					resolve(ws);
 				};
 				ws.onclose = (event) => {
+					clearInterval(this.heartbeatInterval);
 					this.connected = false;
 					this.emit('debug', 'Connection closed.');
-					console.log()
 					this.emit('close');
 					if (event.code != 1005 && !this.debugOptions?.disableAutoReconnect) {
 						this.emit('debug', 'Reconnecting to WebSocket in 5 seconds.');
@@ -108,11 +109,11 @@ export class Client extends EventEmitter {
 					this.emit('message', message);
 
 					let dataToSend;
-					const v = messageHandlers[data.op];
-					if (!v) return;
+					const eventHandler = messageHandlers[data.op];
+					if (!eventHandler) return;
 					
 					try {
-						dataToSend = v(this, data.d, this.debugOptions);
+						dataToSend = eventHandler(this, data.d, this.debugOptions);
 					} catch (err) {
 						this.emit('debug', `[${Common.OperationCodes[data.op]}]: ${err}`);
 						throw err;
@@ -183,7 +184,7 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 			}
 		}
 
-		if (missing.length > 0) this.client.emit('debug', 'Warning: Guild interaction response missing the following elements: ' + missing.join(', '));
+		if (missing.length > 0) this.client.emit('debug', 'Warning: Guild interaction response is missing the following elements: ' + missing.join(', '));
 		
 		// default position values
 		for (const element of this.requestedElements) {

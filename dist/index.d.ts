@@ -1,4 +1,5 @@
 /// <reference types="node" />
+/// <reference types="node" />
 import * as Common from './common';
 import WebSocket from 'ws';
 import EventEmitter from 'node:events';
@@ -15,6 +16,7 @@ export declare class Client extends EventEmitter {
     connected: boolean;
     /** Options for debugging BotPanel.js */
     debugOptions: undefined | Common.ClientDebugOptions;
+    heartbeatInterval: undefined | NodeJS.Timeout;
     /**
      * @param options Authentication options
     */
