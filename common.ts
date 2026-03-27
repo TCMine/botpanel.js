@@ -1,6 +1,6 @@
 //import { Client } from './';
 
-export const BP_VERSION = '1.1.0';
+export const BP_VERSION = '1.2.1';
 
 export enum OperationCodes {
 	/** Request to authenticate */
@@ -57,7 +57,8 @@ export interface ServerResponseAuthSuccess {
 
 export interface InteractionInfo {
 	interactionId: string,
-	guildId: string
+	guildId: string,
+	userId: string
 }
 
 export interface GuildRequestResponse {
@@ -74,7 +75,7 @@ export interface GuildRequestResponse {
 	categories?: Array<GuildElement>,
 	/** Formatted list of the guild's roles */
 	roles?: Array<GuildElement>,
-	/** Object of variables for use in the client dashboard */
+	/** Variable object for use in the client dashboard */
 	variables?: { [key: string]: DynamicSelectOption[] | number | string }
 }
 
@@ -92,8 +93,8 @@ export interface GuildRequestInfo extends InteractionInfo {
 export interface GuildDataChangeInfo extends InteractionInfo {
 	varname: string,
 	data: GuildData,
-	userId: string,
-	inputType: ComponentType.Text | ComponentType.Number | ComponentType.Checkbox | ComponentType.Select
+	inputType: ComponentType.Text | ComponentType.Number | ComponentType.Checkbox | ComponentType.Select,
+	sectionHeader: string
 }
 
 export interface GuildElement {
@@ -110,9 +111,9 @@ export interface DynamicSelectOption {
 }
 
 export interface AuthenticationData {
-	/** ID of the client */
+	/** Client ID */
 	id: string,
-	/** Secret key of the client (do not share this) */
+	/** Client Secret (do not share this) */
 	secret: string,
 	/** Custom WebSocket server URL (you should only use a trusted server) */
 	wss?: string,

@@ -41,7 +41,7 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 		throw Error(error);
 	},
 	[Common.OperationCodes.GUILD_INTERACTION]: (client: Client, data: Common.GuildRequestInfo) => {
-		return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include });
+		return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include, userId: data.userId });
 	},
 	[Common.OperationCodes.MODIFY_GUILD_DATA]: (client: Client, data: Common.GuildDataChangeInfo) => {
 		return new DashboardChangeInteraction(client, data);
@@ -78,10 +78,10 @@ export class Client extends EventEmitter {
 		return new Promise<WebSocket | null>((resolve) => {
 			try {
 				const ws = new WebSocket(this.authOptions.wss ?? 'wss://wss.botpanel.xyz');
-				if (this.ws) this.ws.close; 
+				if (this.ws) this.ws.close();
 				this.ws = ws;
 				this.connected = false;
-				
+
 				ws.onopen = () => {
 					this.emit('debug', 'Connection initialized.');
 					resolve(ws);
@@ -93,8 +93,8 @@ export class Client extends EventEmitter {
 					this.emit('close');
 					if (event.code != 1005 && !this.debugOptions?.disableAutoReconnect) {
 						this.emit('debug', 'Reconnecting to WebSocket in 5 seconds.');
-						setTimeout(()=>{this.login();},5000);
-					}		
+						setTimeout(() => { this.login(); }, 5000);
+					}
 				};
 
 				ws.on('error', (err) => {
@@ -105,20 +105,20 @@ export class Client extends EventEmitter {
 				ws.onmessage = (event) => {
 					const message: string = event.data.toString();
 					const data: Common.ServerMessage = JSON.parse(message);
-					
+
 					this.emit('message', message);
 
 					let dataToSend;
 					const eventHandler = messageHandlers[data.op];
 					if (!eventHandler) return;
-					
+
 					try {
 						dataToSend = eventHandler(this, data.d, this.debugOptions);
 					} catch (err) {
 						this.emit('debug', `[${Common.OperationCodes[data.op]}]: ${err}`);
 						throw err;
 					}
-					
+
 					this.emit(getEnumKeyByEnumValue(Common.OperationCodes, data.op) ?? data.op.toString(), dataToSend);
 				};
 			} catch (err) {
@@ -127,14 +127,14 @@ export class Client extends EventEmitter {
 			}
 		});
 	}
-	
+
 	/** Closes the WebSocket connection */
 	disconnect() {
 		if (this.connected) this.ws?.close();
 	}
-	
+
 	/** Sends a message to the WebSocket server (as JSON) */
-	send(message: object) {this.ws?.send(JSON.stringify(message));}
+	send(message: object) { this.ws?.send(JSON.stringify(message)); }
 }
 
 export class DashboardInteraction {
@@ -159,9 +159,9 @@ export class DashboardInteraction {
 */
 export class DashboardRequestInteraction extends DashboardInteraction {
 	requestedElements: Common.GuildRequestInfo['include'];
-	constructor(client: Client, options: Common.GuildRequestInfo) {
-		super(client, options);
-		this.requestedElements = options.include;
+	constructor(client: Client, interactionInfo: Common.GuildRequestInfo) {
+		super(client, interactionInfo);
+		this.requestedElements = interactionInfo.include;
 	}
 	/**
 	 * Sends an interaction response containing guild information
@@ -185,7 +185,7 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 		}
 
 		if (missing.length > 0) this.client.emit('debug', 'Warning: Guild interaction response is missing the following elements: ' + missing.join(', '));
-		
+
 		// default position values
 		for (const element of this.requestedElements) {
 			const elements = info[element];
@@ -207,6 +207,7 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 					voiceChannels: info.voiceChannels ?? [],
 					categories: info.categories ?? [],
 					roles: info.roles ?? [],
+					variables: info.variables ?? {}
 				}
 			}), resolve);
 		});
@@ -218,33 +219,41 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 */
 export class DashboardChangeInteraction extends DashboardInteraction {
 	/**
- 	* ID of the user that initiated the interaction
+	  * ID of the user that initiated the interaction
 	*/
 	userId: string;
 	/**
- 	* Dashboard input that was changed
+	  * Dashboard input that was changed
 	*/
 	input: {
 		type: Common.GuildDataChangeInfo['inputType'],
+		sectionHeader: Common.GuildDataChangeInfo['sectionHeader'],
 		name: Common.GuildDataChangeInfo['varname'],
 		value: Common.GuildDataChangeInfo['data']
 	};
+	/**
+	  * The component's section name
+	*/
+	sectionHeader: string;
+
 	rawData: Common.GuildDataChangeInfo;
-	constructor(client: Client, options: Common.GuildDataChangeInfo) {
-		super(client, options);
-		let newValue: Common.GuildData = options.data;
+	constructor(client: Client, interactionInfo: Common.GuildDataChangeInfo) {
+		super(client, interactionInfo);
+		let newValue: Common.GuildData = interactionInfo.data;
 		// convert string to array for Select and Checkbox types
-		if (typeof options.data == 'string') newValue = options.inputType == Common.ComponentType.Checkbox || options.inputType == Common.ComponentType.Select ? options.data.split(',') : options.data;
-		this.userId = options.userId;
+		if (typeof interactionInfo.data == 'string') newValue = interactionInfo.inputType == Common.ComponentType.Checkbox || interactionInfo.inputType == Common.ComponentType.Select ? interactionInfo.data.split(',') : interactionInfo.data;
+		this.userId = interactionInfo.userId;
 		this.input = {
-			type: options.inputType,
-			name: options.varname,
+			type: interactionInfo.inputType,
+			sectionHeader: interactionInfo.sectionHeader,
+			name: interactionInfo.varname,
 			value: newValue
 		};
-		this.rawData = options;
+		this.sectionHeader = interactionInfo.sectionHeader;
+		this.rawData = interactionInfo;
 	}
 	/**
- 	* Sends an interaction response indicating if the change was successful
+	  * Sends an interaction response indicating if the change was successful
 	* @param success Was the change successful? (this will be shown to the user)
 	* @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
 	*/

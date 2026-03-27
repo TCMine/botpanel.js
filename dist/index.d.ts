@@ -45,7 +45,7 @@ export declare class DashboardInteraction {
 */
 export declare class DashboardRequestInteraction extends DashboardInteraction {
     requestedElements: Common.GuildRequestInfo['include'];
-    constructor(client: Client, options: Common.GuildRequestInfo);
+    constructor(client: Client, interactionInfo: Common.GuildRequestInfo);
     /**
      * Sends an interaction response containing guild information
      * @param data Guild info
@@ -57,21 +57,26 @@ export declare class DashboardRequestInteraction extends DashboardInteraction {
 */
 export declare class DashboardChangeInteraction extends DashboardInteraction {
     /**
-    * ID of the user that initiated the interaction
+      * ID of the user that initiated the interaction
     */
     userId: string;
     /**
-    * Dashboard input that was changed
+      * Dashboard input that was changed
     */
     input: {
         type: Common.GuildDataChangeInfo['inputType'];
+        sectionHeader: Common.GuildDataChangeInfo['sectionHeader'];
         name: Common.GuildDataChangeInfo['varname'];
         value: Common.GuildDataChangeInfo['data'];
     };
-    rawData: Common.GuildDataChangeInfo;
-    constructor(client: Client, options: Common.GuildDataChangeInfo);
     /**
-    * Sends an interaction response indicating if the change was successful
+      * The component's section name
+    */
+    sectionHeader: string;
+    rawData: Common.GuildDataChangeInfo;
+    constructor(client: Client, interactionInfo: Common.GuildDataChangeInfo);
+    /**
+      * Sends an interaction response indicating if the change was successful
     * @param success Was the change successful? (this will be shown to the user)
     * @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
     */

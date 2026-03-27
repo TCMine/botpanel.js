@@ -1,28 +1,34 @@
 {
   "name": "botpanel.js",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "description": "A simple library for integrating Discord bots with Bot Panel",
-  "keywords": ["discord", "bot", "dashboard", "typescript"],
+  "keywords": [
+    "discord",
+    "bot",
+    "dashboard",
+    "typescript"
+  ],
+  "homepage": "https://github.com/tcmine/botpanel.js",
   "license": "GPL-3.0-only",
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/tcmine/botpanel.js.git"
   },
-  "homepage": "https://github.com/tcmine/botpanel.js",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "dependencies": {
-    "ws": "^8.16.0"
-  },
   "scripts": {
     "build": "tsc --build"
   },
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
   "devDependencies": {
     "@types/ws": "^8.5.10",
-    "@typescript-eslint/eslint-plugin": "^7.0.2",
-    "@typescript-eslint/parser": "^7.0.2",
-    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
+    "eslint": "^9.39.4",
+    "globals": "^17.4.0",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3"
-  }
+  },
+  "types": "dist/index.d.ts"
 }

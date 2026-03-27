@@ -86,7 +86,7 @@ const messageHandlers = {
         throw Error(error);
     },
     [Common.OperationCodes.GUILD_INTERACTION]: (client, data) => {
-        return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include });
+        return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include, userId: data.userId });
     },
     [Common.OperationCodes.MODIFY_GUILD_DATA]: (client, data) => {
         return new DashboardChangeInteraction(client, data);
@@ -115,7 +115,7 @@ class Client extends node_events_1.default {
                 try {
                     const ws = new ws_1.default((_a = this.authOptions.wss) !== null && _a !== void 0 ? _a : 'wss://wss.botpanel.xyz');
                     if (this.ws)
-                        this.ws.close;
+                        this.ws.close();
                     this.ws = ws;
                     this.connected = false;
                     ws.onopen = () => {
@@ -185,9 +185,9 @@ exports.DashboardInteraction = DashboardInteraction;
  * Guild information request interaction
 */
 class DashboardRequestInteraction extends DashboardInteraction {
-    constructor(client, options) {
-        super(client, options);
-        this.requestedElements = options.include;
+    constructor(client, interactionInfo) {
+        super(client, interactionInfo);
+        this.requestedElements = interactionInfo.include;
     }
     /**
      * Sends an interaction response containing guild information
@@ -225,7 +225,7 @@ class DashboardRequestInteraction extends DashboardInteraction {
                 }
             }
             yield new Promise((resolve) => {
-                var _a, _b, _c, _d, _e;
+                var _a, _b, _c, _d, _e, _f;
                 (_a = this.client.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
                     op: Common.OperationCodes.REQUEST_GUILD_DATA,
                     d: {
@@ -236,6 +236,7 @@ class DashboardRequestInteraction extends DashboardInteraction {
                         voiceChannels: (_c = info.voiceChannels) !== null && _c !== void 0 ? _c : [],
                         categories: (_d = info.categories) !== null && _d !== void 0 ? _d : [],
                         roles: (_e = info.roles) !== null && _e !== void 0 ? _e : [],
+                        variables: (_f = info.variables) !== null && _f !== void 0 ? _f : {}
                     }
                 }), resolve);
             });
@@ -247,22 +248,24 @@ exports.DashboardRequestInteraction = DashboardRequestInteraction;
  * Dashboard changed interaction
 */
 class DashboardChangeInteraction extends DashboardInteraction {
-    constructor(client, options) {
-        super(client, options);
-        let newValue = options.data;
+    constructor(client, interactionInfo) {
+        super(client, interactionInfo);
+        let newValue = interactionInfo.data;
         // convert string to array for Select and Checkbox types
-        if (typeof options.data == 'string')
-            newValue = options.inputType == Common.ComponentType.Checkbox || options.inputType == Common.ComponentType.Select ? options.data.split(',') : options.data;
-        this.userId = options.userId;
+        if (typeof interactionInfo.data == 'string')
+            newValue = interactionInfo.inputType == Common.ComponentType.Checkbox || interactionInfo.inputType == Common.ComponentType.Select ? interactionInfo.data.split(',') : interactionInfo.data;
+        this.userId = interactionInfo.userId;
         this.input = {
-            type: options.inputType,
-            name: options.varname,
+            type: interactionInfo.inputType,
+            sectionHeader: interactionInfo.sectionHeader,
+            name: interactionInfo.varname,
             value: newValue
         };
-        this.rawData = options;
+        this.sectionHeader = interactionInfo.sectionHeader;
+        this.rawData = interactionInfo;
     }
     /**
-    * Sends an interaction response indicating if the change was successful
+      * Sends an interaction response indicating if the change was successful
     * @param success Was the change successful? (this will be shown to the user)
     * @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
     */
