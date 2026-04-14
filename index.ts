@@ -10,7 +10,7 @@ function getEnumKeyByEnumValue(myEnum: any, enumValue: number): string | null { 
 }
 
 const messageHandlers: { [key: number]: (client: Client, data?: any, debugOptions?: Common.ClientDebugOptions) => void } = {
-	/*eslint-enable */
+  /*eslint-enable */
 	[Common.OperationCodes.AUTHENTICATE]: (client: Client) => {
 		client.ws?.send(JSON.stringify({
 			op: Common.OperationCodes.AUTHENTICATE,
@@ -46,13 +46,12 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 	[Common.OperationCodes.MODIFY_GUILD_DATA]: (client: Client, data: Common.GuildDataChangeInfo) => {
 		return new DashboardChangeInteraction(client, data);
 	}
-
 };
 
 /**
  * Represents a client for Bot Panel
  * @constructor
-*/
+ */
 export class Client extends EventEmitter {
 	/** Authentication information for the client */
 	authOptions: Common.AuthenticationData;
@@ -65,8 +64,8 @@ export class Client extends EventEmitter {
 	heartbeatInterval: undefined | NodeJS.Timeout;
 
 	/**
-	 * @param options Authentication options
-	*/
+   * @param options Authentication options
+   */
 	constructor(options: Common.AuthenticationData, debugOptions?: Common.ClientDebugOptions) {
 		super();
 		this.authOptions = options;
@@ -140,12 +139,12 @@ export class Client extends EventEmitter {
 export class DashboardInteraction {
 	client: Client;
 	/**
-	 * Assigned ID for the interaction
-	 */
+   * Assigned ID for the interaction
+   */
 	id: Common.GuildDataChangeInfo['interactionId'] | null;
 	/**
-	 * ID of the guild involved with the interaction
-	 */
+   * ID of the guild involved with the interaction
+   */
 	guildId: Common.GuildDataChangeInfo['guildId'];
 	constructor(client: Client, options: Common.InteractionInfo) {
 		this.client = client;
@@ -156,7 +155,7 @@ export class DashboardInteraction {
 
 /**
  * Guild information request interaction
-*/
+ */
 export class DashboardRequestInteraction extends DashboardInteraction {
 	requestedElements: Common.GuildRequestInfo['include'];
 	constructor(client: Client, interactionInfo: Common.GuildRequestInfo) {
@@ -164,9 +163,9 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 		this.requestedElements = interactionInfo.include;
 	}
 	/**
-	 * Sends an interaction response containing guild information
-	 * @param data Guild info
-	 */
+   * Sends an interaction response containing guild information
+   * @param data Guild info
+   */
 	async send(info: Common.GuildRequestResponse) {
 		info.data ??= {};
 
@@ -216,47 +215,47 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 
 /**
  * Dashboard changed interaction
-*/
+ */
 export class DashboardChangeInteraction extends DashboardInteraction {
 	/**
-	  * ID of the user that initiated the interaction
-	*/
+   * ID of the user that initiated the interaction
+   */
 	userId: string;
 	/**
-	  * Dashboard input that was changed
-	*/
+   * Dashboard input that was changed
+   */
 	input: {
 		type: Common.GuildDataChangeInfo['inputType'],
-		sectionHeader: Common.GuildDataChangeInfo['sectionHeader'],
+		section: Common.GuildDataChangeInfo['sectionHeader'],
 		name: Common.GuildDataChangeInfo['varname'],
 		value: Common.GuildDataChangeInfo['data']
-	};
-	/**
-	  * The component's section name
-	*/
-	sectionHeader: string;
+  };
 
 	rawData: Common.GuildDataChangeInfo;
 	constructor(client: Client, interactionInfo: Common.GuildDataChangeInfo) {
 		super(client, interactionInfo);
 		let newValue: Common.GuildData = interactionInfo.data;
 		// convert string to array for Select and Checkbox types
-		if (typeof interactionInfo.data == 'string') newValue = interactionInfo.inputType == Common.ComponentType.Checkbox || interactionInfo.inputType == Common.ComponentType.Select ? interactionInfo.data.split(',') : interactionInfo.data;
+		if (typeof interactionInfo.data == 'string')
+			newValue =
+        interactionInfo.inputType == Common.ComponentType.Checkbox ||
+        interactionInfo.inputType == Common.ComponentType.Select
+        	? interactionInfo.data.split(',')
+        	: interactionInfo.data;
 		this.userId = interactionInfo.userId;
 		this.input = {
 			type: interactionInfo.inputType,
-			sectionHeader: interactionInfo.sectionHeader,
+			section: interactionInfo.sectionHeader,
 			name: interactionInfo.varname,
 			value: newValue
 		};
-		this.sectionHeader = interactionInfo.sectionHeader;
 		this.rawData = interactionInfo;
 	}
 	/**
-	  * Sends an interaction response indicating if the change was successful
-	* @param success Was the change successful? (this will be shown to the user)
-	* @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
-	*/
+   * Sends an interaction response indicating if the change was successful
+   * @param success Was the change successful? (this will be shown to the user)
+   * @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
+   */
 	async acknowledge(data?: Common.AcknowledgementData) {
 		if (!this.id) throw Error('Interaction already acknowledged');
 		await new Promise((resolve) => {

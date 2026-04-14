@@ -6,7 +6,7 @@ import EventEmitter from 'node:events';
 /**
  * Represents a client for Bot Panel
  * @constructor
-*/
+ */
 export declare class Client extends EventEmitter {
     /** Authentication information for the client */
     authOptions: Common.AuthenticationData;
@@ -18,8 +18,8 @@ export declare class Client extends EventEmitter {
     debugOptions: undefined | Common.ClientDebugOptions;
     heartbeatInterval: undefined | NodeJS.Timeout;
     /**
-     * @param options Authentication options
-    */
+   * @param options Authentication options
+   */
     constructor(options: Common.AuthenticationData, debugOptions?: Common.ClientDebugOptions);
     /** Connects to the Bot Panel WebSocket and login */
     login(): Promise<WebSocket | null>;
@@ -31,55 +31,51 @@ export declare class Client extends EventEmitter {
 export declare class DashboardInteraction {
     client: Client;
     /**
-     * Assigned ID for the interaction
-     */
+   * Assigned ID for the interaction
+   */
     id: Common.GuildDataChangeInfo['interactionId'] | null;
     /**
-     * ID of the guild involved with the interaction
-     */
+   * ID of the guild involved with the interaction
+   */
     guildId: Common.GuildDataChangeInfo['guildId'];
     constructor(client: Client, options: Common.InteractionInfo);
 }
 /**
  * Guild information request interaction
-*/
+ */
 export declare class DashboardRequestInteraction extends DashboardInteraction {
     requestedElements: Common.GuildRequestInfo['include'];
     constructor(client: Client, interactionInfo: Common.GuildRequestInfo);
     /**
-     * Sends an interaction response containing guild information
-     * @param data Guild info
-     */
+   * Sends an interaction response containing guild information
+   * @param data Guild info
+   */
     send(info: Common.GuildRequestResponse): Promise<void>;
 }
 /**
  * Dashboard changed interaction
-*/
+ */
 export declare class DashboardChangeInteraction extends DashboardInteraction {
     /**
-      * ID of the user that initiated the interaction
-    */
+   * ID of the user that initiated the interaction
+   */
     userId: string;
     /**
-      * Dashboard input that was changed
-    */
+   * Dashboard input that was changed
+   */
     input: {
         type: Common.GuildDataChangeInfo['inputType'];
-        sectionHeader: Common.GuildDataChangeInfo['sectionHeader'];
+        section: Common.GuildDataChangeInfo['sectionHeader'];
         name: Common.GuildDataChangeInfo['varname'];
         value: Common.GuildDataChangeInfo['data'];
     };
-    /**
-      * The component's section name
-    */
-    sectionHeader: string;
     rawData: Common.GuildDataChangeInfo;
     constructor(client: Client, interactionInfo: Common.GuildDataChangeInfo);
     /**
-      * Sends an interaction response indicating if the change was successful
-    * @param success Was the change successful? (this will be shown to the user)
-    * @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
-    */
+   * Sends an interaction response indicating if the change was successful
+   * @param success Was the change successful? (this will be shown to the user)
+   * @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
+   */
     acknowledge(data?: Common.AcknowledgementData): Promise<void>;
 }
 export * from './common';

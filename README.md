@@ -55,9 +55,13 @@ client.on('GUILD_INTERACTION', (interaction: DashboardRequestInteraction) => {
 >> `inGuild: boolean` : Whether the bot is in the guild or not. If this is false, the dashboard will display a message to the user instead of the dashboard's inputs.<br>
 >> `data: object` : Object containing entries with the input names as keys and their input values as values. If present, this will be used to display the currently set data on the dashboard.<br>
 >> ### Guild Elements<br>
->> These values should be used when requested by the guild interaction. An array of names for the requested elements is stored in `.requestedElements`: **`textChannels`, `voiceChannels`, `categories`, `roles`**<br>
+>> These values should be used when requested by the guild interaction. An array of names for the requested elements is stored in the `requestedElements` object: **`textChannels`, `voiceChannels`, `categories`, `roles`**<br>
 >> These entries must hold an array of objects with a `name: string` and `id: string`. You may optionally specify a `position: number`, for better sorting on the dashboard.<br>
 >> Role objects have an optional `managed: boolean` key for bot roles.<br>
+>> ### Variables<br>
+>> Variables can be sent to dashboard for headers (using `#{variableName}` in component text values) and dynamic select menus using a `variables` object in `data`.
+>> Variable entries can be any `string`, `number` or array of select options (`DynamicSelectOption` object) with the values `name`, `value` and, optionally, `icon?`.<br>
+
 
 `Dashboard Change Interaction` (emitted through `MODIFY_GUILD_DATA`):
 ```ts
@@ -68,7 +72,7 @@ client.on('MODIFY_GUILD_DATA', (interaction: DashboardChangeInteraction) => {
     console.log(`User (${interaction.userId}) changed guild data "${interaction.input.name}"!`);
 });
 ```
-> These interactions hold the ID of the guild (`guildId`), dashboard user (`userId`) and information of the input, such as the `name`, `type` and `value`, inside an object (`input`).<br>
+> These interactions hold the ID of the guild (`guildId`), dashboard user (`userId`) and information of the input, such as the `name`, `type`, `section` and `value`, inside the (`input`) object.<br>
 >  The interaction is acknowledged with the `.acknowledge()` method to display a success message. This method accepts an object containing these entries:<br>
 >> `success?: boolean` is a boolean value that determines whether to show an input success or failure message on the dashboard. This is `true` by default.<br>
 >> `message?: string` is a string that displays a custom response message on the user's dashboard.<br>
@@ -82,5 +86,4 @@ client.disconnect();
 ```
 
 ## Information
-Bot Panel (the service that this module is made for) is made by @oneandonlyfinbar & @bunnywasnothere. You can join their Discord server here: https://discord.gg/RdPTks5gd9<br>
-This module is not affiliated or created by the developers of Bot Panel.
+Bot Panel (the service that this module is made for) is a project maintained by @themondon & @bunnywasnothere and created by @oneandonlyfinbar. You can join the Discord server here: https://discord.gg/RdPTks5gd9.<br>

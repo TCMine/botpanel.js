@@ -95,11 +95,11 @@ const messageHandlers = {
 /**
  * Represents a client for Bot Panel
  * @constructor
-*/
+ */
 class Client extends node_events_1.default {
     /**
-     * @param options Authentication options
-    */
+   * @param options Authentication options
+   */
     constructor(options, debugOptions) {
         super();
         /** Whether the client is currently connected to the WebSocket */
@@ -183,16 +183,16 @@ class DashboardInteraction {
 exports.DashboardInteraction = DashboardInteraction;
 /**
  * Guild information request interaction
-*/
+ */
 class DashboardRequestInteraction extends DashboardInteraction {
     constructor(client, interactionInfo) {
         super(client, interactionInfo);
         this.requestedElements = interactionInfo.include;
     }
     /**
-     * Sends an interaction response containing guild information
-     * @param data Guild info
-     */
+   * Sends an interaction response containing guild information
+   * @param data Guild info
+   */
     send(info) {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
@@ -246,29 +246,32 @@ class DashboardRequestInteraction extends DashboardInteraction {
 exports.DashboardRequestInteraction = DashboardRequestInteraction;
 /**
  * Dashboard changed interaction
-*/
+ */
 class DashboardChangeInteraction extends DashboardInteraction {
     constructor(client, interactionInfo) {
         super(client, interactionInfo);
         let newValue = interactionInfo.data;
         // convert string to array for Select and Checkbox types
         if (typeof interactionInfo.data == 'string')
-            newValue = interactionInfo.inputType == Common.ComponentType.Checkbox || interactionInfo.inputType == Common.ComponentType.Select ? interactionInfo.data.split(',') : interactionInfo.data;
+            newValue =
+                interactionInfo.inputType == Common.ComponentType.Checkbox ||
+                    interactionInfo.inputType == Common.ComponentType.Select
+                    ? interactionInfo.data.split(',')
+                    : interactionInfo.data;
         this.userId = interactionInfo.userId;
         this.input = {
             type: interactionInfo.inputType,
-            sectionHeader: interactionInfo.sectionHeader,
+            section: interactionInfo.sectionHeader,
             name: interactionInfo.varname,
             value: newValue
         };
-        this.sectionHeader = interactionInfo.sectionHeader;
         this.rawData = interactionInfo;
     }
     /**
-      * Sends an interaction response indicating if the change was successful
-    * @param success Was the change successful? (this will be shown to the user)
-    * @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
-    */
+   * Sends an interaction response indicating if the change was successful
+   * @param success Was the change successful? (this will be shown to the user)
+   * @param newValue Optional new value to display on the dashboard input (if 'success' is not false).
+   */
     acknowledge(data) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.id)
