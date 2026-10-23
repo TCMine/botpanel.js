@@ -178,6 +178,7 @@ class DashboardInteraction {
         this.client = client;
         this.id = options.interactionId;
         this.guildId = options.guildId;
+        this.guildName = options.guildName;
     }
 }
 exports.DashboardInteraction = DashboardInteraction;
@@ -225,18 +226,19 @@ class DashboardRequestInteraction extends DashboardInteraction {
                 }
             }
             yield new Promise((resolve) => {
-                var _a, _b, _c, _d, _e, _f;
+                var _a, _b, _c, _d, _e, _f, _g;
                 (_a = this.client.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
                     op: Common.OperationCodes.REQUEST_GUILD_DATA,
                     d: {
                         interactionId: this.id,
+                        guildName: (_b = info.guildName) !== null && _b !== void 0 ? _b : this.guildName,
                         data: info.data,
                         inGuild: info.inGuild,
-                        textChannels: (_b = info.textChannels) !== null && _b !== void 0 ? _b : [],
-                        voiceChannels: (_c = info.voiceChannels) !== null && _c !== void 0 ? _c : [],
-                        categories: (_d = info.categories) !== null && _d !== void 0 ? _d : [],
-                        roles: (_e = info.roles) !== null && _e !== void 0 ? _e : [],
-                        variables: (_f = info.variables) !== null && _f !== void 0 ? _f : {}
+                        textChannels: (_c = info.textChannels) !== null && _c !== void 0 ? _c : [],
+                        voiceChannels: (_d = info.voiceChannels) !== null && _d !== void 0 ? _d : [],
+                        categories: (_e = info.categories) !== null && _e !== void 0 ? _e : [],
+                        roles: (_f = info.roles) !== null && _f !== void 0 ? _f : [],
+                        variables: (_g = info.variables) !== null && _g !== void 0 ? _g : {}
                     }
                 }), resolve);
             });

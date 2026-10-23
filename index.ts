@@ -150,7 +150,9 @@ export class DashboardInteraction {
 		this.client = client;
 		this.id = options.interactionId;
 		this.guildId = options.guildId;
+		this.guildName = options.guildName;
 	}
+	guildName?: Common.InteractionInfo['guildName'];
 }
 
 /**
@@ -200,6 +202,7 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 				op: Common.OperationCodes.REQUEST_GUILD_DATA,
 				d: {
 					interactionId: this.id,
+					guildName: info.guildName ?? this.guildName,
 					data: info.data,
 					inGuild: info.inGuild,
 					textChannels: info.textChannels ?? [],

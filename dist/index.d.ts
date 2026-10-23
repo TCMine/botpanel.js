@@ -39,6 +39,7 @@ export declare class DashboardInteraction {
    */
     guildId: Common.GuildDataChangeInfo['guildId'];
     constructor(client: Client, options: Common.InteractionInfo);
+    guildName?: Common.InteractionInfo['guildName'];
 }
 /**
  * Guild information request interaction

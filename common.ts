@@ -23,6 +23,7 @@ export enum OperationCodes {
 export enum ComponentType {
 	Text = 'Text',
 	Number = 'Number',
+	Color = 'Color',
 	Checkbox = 'Checkbox',
 	Select = 'Select',
 	TextChannelSelect = 'Text Channel Select',
@@ -58,11 +59,13 @@ export interface ServerResponseAuthSuccess {
 export interface InteractionInfo {
 	interactionId: string,
 	guildId: string,
+	guildName?: string,
 	userId: string
 }
 
 export interface GuildRequestResponse {
 	interactionId?: string,
+	guildName?: string,
 	/** Object of guild data for the dashboard. */
 	data?: { [key: string]: GuildData },
 	/** Bot is in the guild? */
@@ -93,7 +96,12 @@ export interface GuildRequestInfo extends InteractionInfo {
 export interface GuildDataChangeInfo extends InteractionInfo {
 	varname: string,
 	data: GuildData,
-	inputType: ComponentType.Text | ComponentType.Number | ComponentType.Checkbox | ComponentType.Select,
+	inputType:
+		| ComponentType.Text
+		| ComponentType.Number
+		| ComponentType.Color
+		| ComponentType.Checkbox
+		| ComponentType.Select,
 	sectionHeader: string
 }
 
