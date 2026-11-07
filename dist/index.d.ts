@@ -17,6 +17,11 @@ export declare class Client extends EventEmitter {
     /** Options for debugging BotPanel.js */
     debugOptions: undefined | Common.ClientDebugOptions;
     heartbeatInterval: undefined | NodeJS.Timeout;
+    /** Transcript uploads awaiting a server response, keyed by nonce */
+    pendingTranscripts: Map<string, {
+        resolve: (id: string) => void;
+        reject: (err: Error) => void;
+    }>;
     /**
    * @param options Authentication options
    */
@@ -27,6 +32,13 @@ export declare class Client extends EventEmitter {
     disconnect(): void;
     /** Sends a message to the WebSocket server (as JSON) */
     send(message: object): void;
+    /**
+     * Uploads an HTML transcript (requires WebSocket server 1.3.0+)
+     * @param guildId ID of the guild the transcript belongs to
+     * @param html The transcript HTML (sent as a UTF-8 string)
+     * @returns The full URL of the uploaded transcript
+     */
+    uploadTranscript(guildId: string, html: string, timeoutMs?: number): Promise<string>;
 }
 export declare class DashboardInteraction {
     client: Client;
