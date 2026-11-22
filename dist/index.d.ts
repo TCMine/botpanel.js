@@ -39,13 +39,14 @@ export declare class DashboardInteraction {
    */
     guildId: Common.GuildDataChangeInfo['guildId'];
     constructor(client: Client, options: Common.InteractionInfo);
-    guildName?: Common.InteractionInfo['guildName'];
 }
 /**
  * Guild information request interaction
  */
 export declare class DashboardRequestInteraction extends DashboardInteraction {
     requestedElements: Common.GuildRequestInfo['include'];
+    /** Optional guild display name supplied by WSS for developer-dashboard analytics. */
+    guildName?: Common.GuildRequestInfo['guildName'];
     constructor(client: Client, interactionInfo: Common.GuildRequestInfo);
     /**
    * Sends an interaction response containing guild information

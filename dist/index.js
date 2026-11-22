@@ -86,7 +86,15 @@ const messageHandlers = {
         throw Error(error);
     },
     [Common.OperationCodes.GUILD_INTERACTION]: (client, data) => {
-        return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include, userId: data.userId });
+        // guildName is optional metadata used by developer-dashboard analytics.
+        // WSS supplies it when available; apps may use their own guild cache as an override.
+        return new DashboardRequestInteraction(client, {
+            interactionId: data.interactionId,
+            guildId: data.guildId,
+            guildName: data.guildName,
+            include: data.include,
+            userId: data.userId,
+        });
     },
     [Common.OperationCodes.MODIFY_GUILD_DATA]: (client, data) => {
         return new DashboardChangeInteraction(client, data);
@@ -178,7 +186,6 @@ class DashboardInteraction {
         this.client = client;
         this.id = options.interactionId;
         this.guildId = options.guildId;
-        this.guildName = options.guildName;
     }
 }
 exports.DashboardInteraction = DashboardInteraction;
@@ -189,6 +196,7 @@ class DashboardRequestInteraction extends DashboardInteraction {
     constructor(client, interactionInfo) {
         super(client, interactionInfo);
         this.requestedElements = interactionInfo.include;
+        this.guildName = interactionInfo.guildName;
     }
     /**
    * Sends an interaction response containing guild information
@@ -231,6 +239,8 @@ class DashboardRequestInteraction extends DashboardInteraction {
                     op: Common.OperationCodes.REQUEST_GUILD_DATA,
                     d: {
                         interactionId: this.id,
+                        // Prefer an app-provided name, then the name supplied by WSS.
+                        // If neither exists, WSS retains the guild ID and analytics fallback behavior.
                         guildName: (_b = info.guildName) !== null && _b !== void 0 ? _b : this.guildName,
                         data: info.data,
                         inGuild: info.inGuild,

@@ -59,12 +59,12 @@ export interface ServerResponseAuthSuccess {
 export interface InteractionInfo {
 	interactionId: string,
 	guildId: string,
-	guildName?: string,
 	userId: string
 }
 
 export interface GuildRequestResponse {
 	interactionId?: string,
+	/** Optional app-supplied guild name. Overrides WSS guildName in the analytics log. */
 	guildName?: string,
 	/** Object of guild data for the dashboard. */
 	data?: { [key: string]: GuildData },
@@ -90,6 +90,8 @@ export interface InteractionResponse {
 }
 
 export interface GuildRequestInfo extends InteractionInfo {
+	/** Optional guild display name supplied by WSS for developer-dashboard analytics. */
+	guildName?: string,
 	include: Array<'categories' | 'textChannels' | 'voiceChannels' | 'roles'>
 }
 
