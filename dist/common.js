@@ -26,6 +26,7 @@ var ComponentType;
 (function (ComponentType) {
     ComponentType["Text"] = "Text";
     ComponentType["Number"] = "Number";
+    ComponentType["Color"] = "Color";
     ComponentType["Checkbox"] = "Checkbox";
     ComponentType["Select"] = "Select";
     ComponentType["TextChannelSelect"] = "Text Channel Select";

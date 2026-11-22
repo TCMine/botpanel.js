@@ -41,7 +41,15 @@ const messageHandlers: { [key: number]: (client: Client, data?: any, debugOption
 		throw Error(error);
 	},
 	[Common.OperationCodes.GUILD_INTERACTION]: (client: Client, data: Common.GuildRequestInfo) => {
-		return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include, userId: data.userId });
+		// guildName is optional metadata used by developer-dashboard analytics.
+		// WSS supplies it when available; apps may use their own guild cache as an override.
+		return new DashboardRequestInteraction(client, {
+			interactionId: data.interactionId,
+			guildId: data.guildId,
+			guildName: data.guildName,
+			include: data.include,
+			userId: data.userId,
+		});
 	},
 	[Common.OperationCodes.MODIFY_GUILD_DATA]: (client: Client, data: Common.GuildDataChangeInfo) => {
 		return new DashboardChangeInteraction(client, data);
@@ -158,9 +166,12 @@ export class DashboardInteraction {
  */
 export class DashboardRequestInteraction extends DashboardInteraction {
 	requestedElements: Common.GuildRequestInfo['include'];
+	/** Optional guild display name supplied by WSS for developer-dashboard analytics. */
+	guildName?: Common.GuildRequestInfo['guildName'];
 	constructor(client: Client, interactionInfo: Common.GuildRequestInfo) {
 		super(client, interactionInfo);
 		this.requestedElements = interactionInfo.include;
+		this.guildName = interactionInfo.guildName;
 	}
 	/**
    * Sends an interaction response containing guild information
@@ -200,6 +211,9 @@ export class DashboardRequestInteraction extends DashboardInteraction {
 				op: Common.OperationCodes.REQUEST_GUILD_DATA,
 				d: {
 					interactionId: this.id,
+					// Prefer an app-provided name, then the name supplied by WSS.
+					// If neither exists, WSS retains the guild ID and analytics fallback behavior.
+					guildName: info.guildName ?? this.guildName,
 					data: info.data,
 					inGuild: info.inGuild,
 					textChannels: info.textChannels ?? [],

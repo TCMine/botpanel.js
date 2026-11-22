@@ -86,7 +86,15 @@ const messageHandlers = {
         throw Error(error);
     },
     [Common.OperationCodes.GUILD_INTERACTION]: (client, data) => {
-        return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include, userId: data.userId });
+        // guildName is optional metadata used by developer-dashboard analytics.
+        // WSS supplies it when available; apps may use their own guild cache as an override.
+        return new DashboardRequestInteraction(client, {
+            interactionId: data.interactionId,
+            guildId: data.guildId,
+            guildName: data.guildName,
+            include: data.include,
+            userId: data.userId,
+        });
     },
     [Common.OperationCodes.MODIFY_GUILD_DATA]: (client, data) => {
         return new DashboardChangeInteraction(client, data);
@@ -188,6 +196,7 @@ class DashboardRequestInteraction extends DashboardInteraction {
     constructor(client, interactionInfo) {
         super(client, interactionInfo);
         this.requestedElements = interactionInfo.include;
+        this.guildName = interactionInfo.guildName;
     }
     /**
    * Sends an interaction response containing guild information
@@ -225,18 +234,21 @@ class DashboardRequestInteraction extends DashboardInteraction {
                 }
             }
             yield new Promise((resolve) => {
-                var _a, _b, _c, _d, _e, _f;
+                var _a, _b, _c, _d, _e, _f, _g;
                 (_a = this.client.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
                     op: Common.OperationCodes.REQUEST_GUILD_DATA,
                     d: {
                         interactionId: this.id,
+                        // Prefer an app-provided name, then the name supplied by WSS.
+                        // If neither exists, WSS retains the guild ID and analytics fallback behavior.
+                        guildName: (_b = info.guildName) !== null && _b !== void 0 ? _b : this.guildName,
                         data: info.data,
                         inGuild: info.inGuild,
-                        textChannels: (_b = info.textChannels) !== null && _b !== void 0 ? _b : [],
-                        voiceChannels: (_c = info.voiceChannels) !== null && _c !== void 0 ? _c : [],
-                        categories: (_d = info.categories) !== null && _d !== void 0 ? _d : [],
-                        roles: (_e = info.roles) !== null && _e !== void 0 ? _e : [],
-                        variables: (_f = info.variables) !== null && _f !== void 0 ? _f : {}
+                        textChannels: (_c = info.textChannels) !== null && _c !== void 0 ? _c : [],
+                        voiceChannels: (_d = info.voiceChannels) !== null && _d !== void 0 ? _d : [],
+                        categories: (_e = info.categories) !== null && _e !== void 0 ? _e : [],
+                        roles: (_f = info.roles) !== null && _f !== void 0 ? _f : [],
+                        variables: (_g = info.variables) !== null && _g !== void 0 ? _g : {}
                     }
                 }), resolve);
             });

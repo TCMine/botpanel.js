@@ -23,6 +23,7 @@ export enum OperationCodes {
 export enum ComponentType {
 	Text = 'Text',
 	Number = 'Number',
+	Color = 'Color',
 	Checkbox = 'Checkbox',
 	Select = 'Select',
 	TextChannelSelect = 'Text Channel Select',
@@ -63,6 +64,8 @@ export interface InteractionInfo {
 
 export interface GuildRequestResponse {
 	interactionId?: string,
+	/** Optional app-supplied guild name. Overrides WSS guildName in the analytics log. */
+	guildName?: string,
 	/** Object of guild data for the dashboard. */
 	data?: { [key: string]: GuildData },
 	/** Bot is in the guild? */
@@ -87,13 +90,20 @@ export interface InteractionResponse {
 }
 
 export interface GuildRequestInfo extends InteractionInfo {
+	/** Optional guild display name supplied by WSS for developer-dashboard analytics. */
+	guildName?: string,
 	include: Array<'categories' | 'textChannels' | 'voiceChannels' | 'roles'>
 }
 
 export interface GuildDataChangeInfo extends InteractionInfo {
 	varname: string,
 	data: GuildData,
-	inputType: ComponentType.Text | ComponentType.Number | ComponentType.Checkbox | ComponentType.Select,
+	inputType:
+		| ComponentType.Text
+		| ComponentType.Number
+		| ComponentType.Color
+		| ComponentType.Checkbox
+		| ComponentType.Select,
 	sectionHeader: string
 }
 

@@ -45,6 +45,8 @@ export declare class DashboardInteraction {
  */
 export declare class DashboardRequestInteraction extends DashboardInteraction {
     requestedElements: Common.GuildRequestInfo['include'];
+    /** Optional guild display name supplied by WSS for developer-dashboard analytics. */
+    guildName?: Common.GuildRequestInfo['guildName'];
     constructor(client: Client, interactionInfo: Common.GuildRequestInfo);
     /**
    * Sends an interaction response containing guild information
