@@ -1,6 +1,6 @@
 //import { Client } from './';
 
-export const BP_VERSION = '1.2.1';
+export const BP_VERSION = '1.3.0';
 
 export enum OperationCodes {
 	/** Request to authenticate */
@@ -18,7 +18,10 @@ export enum OperationCodes {
 	MODIFY_GUILD_DATA = 6,
 	/** Acknowledges MODIFY_GUILD_DATA */
 	ACKNOWLEDGE_INTERACTION = 7,
-	HEARTBEAT = 8
+	HEARTBEAT = 8,
+	/** Uploads an HTML transcript; the response contains its URL */
+	TRANSCRIPT_UPLOAD = 9,
+	TRANSCRIPT_DELETE = 10 // reserved for browser clients
 }
 export enum ComponentType {
 	Text = 'Text',
@@ -51,6 +54,12 @@ export interface ServerResponseError {
 export interface ServerResponseAuthSuccess {
 	name: string,
 	heartbeatInterval: number
+}
+
+export interface ServerResponseTranscriptUpload {
+	id: string,
+	url: string,
+	nonce?: string
 }
 
 

@@ -42,6 +42,7 @@ exports.DashboardChangeInteraction = exports.DashboardRequestInteraction = expor
 const Common = __importStar(require("./common"));
 const ws_1 = __importDefault(require("ws"));
 const node_events_1 = __importDefault(require("node:events"));
+const node_crypto_1 = require("node:crypto");
 /*eslint-disable */
 // ts wont shut up if I put any type other than "any" for this or the messageHandlers. maybe theres a way to fix this, but I don't know it.
 function getEnumKeyByEnumValue(myEnum, enumValue) {
@@ -83,7 +84,18 @@ const messageHandlers = {
         let error = data.error;
         if (error.toLowerCase().includes('invalid websocket version'))
             error = 'Outdated WebSocket server version. Please update BotPanel.js.';
+        for (const pending of client.pendingTranscripts.values())
+            pending.reject(Error(error));
+        client.pendingTranscripts.clear();
         throw Error(error);
+    },
+    [Common.OperationCodes.TRANSCRIPT_UPLOAD]: (client, data) => {
+        var _a;
+        if (data.nonce) {
+            (_a = client.pendingTranscripts.get(data.nonce)) === null || _a === void 0 ? void 0 : _a.resolve(data.url);
+            client.pendingTranscripts.delete(data.nonce);
+        }
+        return data;
     },
     [Common.OperationCodes.GUILD_INTERACTION]: (client, data) => {
         return new DashboardRequestInteraction(client, { interactionId: data.interactionId, guildId: data.guildId, include: data.include, userId: data.userId });
@@ -104,6 +116,8 @@ class Client extends node_events_1.default {
         super();
         /** Whether the client is currently connected to the WebSocket */
         this.connected = false;
+        /** Transcript uploads awaiting a server response, keyed by nonce */
+        this.pendingTranscripts = new Map();
         this.authOptions = options;
         this.debugOptions = debugOptions;
     }
@@ -126,6 +140,9 @@ class Client extends node_events_1.default {
                         var _a;
                         clearInterval(this.heartbeatInterval);
                         this.connected = false;
+                        for (const pending of this.pendingTranscripts.values())
+                            pending.reject(Error(`Connection closed (code ${event.code}) before the transcript upload completed`));
+                        this.pendingTranscripts.clear();
                         this.emit('debug', 'Connection closed.');
                         this.emit('close');
                         if (event.code != 1005 && !((_a = this.debugOptions) === null || _a === void 0 ? void 0 : _a.disableAutoReconnect)) {
@@ -171,6 +188,31 @@ class Client extends node_events_1.default {
     }
     /** Sends a message to the WebSocket server (as JSON) */
     send(message) { var _a; (_a = this.ws) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify(message)); }
+    /**
+     * Uploads an HTML transcript (requires WebSocket server 1.3.0+)
+     * @param guildId ID of the guild the transcript belongs to
+     * @param html The transcript HTML (sent as a UTF-8 string)
+     * @returns The full URL of the uploaded transcript
+     */
+    uploadTranscript(guildId, html, timeoutMs = 30000) {
+        return new Promise((resolve, reject) => {
+            if (!this.connected || !this.ws)
+                return reject(Error('Not connected to the WebSocket'));
+            const nonce = (0, node_crypto_1.randomUUID)();
+            const timeout = setTimeout(() => {
+                this.pendingTranscripts.delete(nonce);
+                reject(Error('Transcript upload timed out'));
+            }, timeoutMs);
+            this.pendingTranscripts.set(nonce, {
+                resolve: (id) => { clearTimeout(timeout); resolve(id); },
+                reject: (err) => { clearTimeout(timeout); reject(err); }
+            });
+            this.ws.send(JSON.stringify({
+                op: Common.OperationCodes.TRANSCRIPT_UPLOAD,
+                d: { guildId, html, nonce }
+            }));
+        });
+    }
 }
 exports.Client = Client;
 class DashboardInteraction {

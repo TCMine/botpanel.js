@@ -2,7 +2,7 @@
 //import { Client } from './';
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ElementType = exports.ComponentType = exports.OperationCodes = exports.BP_VERSION = void 0;
-exports.BP_VERSION = '1.2.1';
+exports.BP_VERSION = '1.3.0';
 var OperationCodes;
 (function (OperationCodes) {
     /** Request to authenticate */
@@ -21,6 +21,9 @@ var OperationCodes;
     /** Acknowledges MODIFY_GUILD_DATA */
     OperationCodes[OperationCodes["ACKNOWLEDGE_INTERACTION"] = 7] = "ACKNOWLEDGE_INTERACTION";
     OperationCodes[OperationCodes["HEARTBEAT"] = 8] = "HEARTBEAT";
+    /** Uploads an HTML transcript; the response contains its URL */
+    OperationCodes[OperationCodes["TRANSCRIPT_UPLOAD"] = 9] = "TRANSCRIPT_UPLOAD";
+    OperationCodes[OperationCodes["TRANSCRIPT_DELETE"] = 10] = "TRANSCRIPT_DELETE"; // reserved for browser clients
 })(OperationCodes || (exports.OperationCodes = OperationCodes = {}));
 var ComponentType;
 (function (ComponentType) {
